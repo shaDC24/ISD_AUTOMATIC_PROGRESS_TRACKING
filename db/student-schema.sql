@@ -60,6 +60,7 @@ CREATE TABLE video_lectures (
     section_id  INT NOT NULL REFERENCES sections(id) ON DELETE CASCADE,
     title       VARCHAR(200) NOT NULL,
     video_url   VARCHAR(500) NOT NULL,
+    subtitle_url VARCHAR(500) DEFAULT NULL,
     duration    NUMERIC(10, 2) NOT NULL DEFAULT 0,
     position    INT NOT NULL DEFAULT 1,
     created_at  TIMESTAMP DEFAULT NOW()
