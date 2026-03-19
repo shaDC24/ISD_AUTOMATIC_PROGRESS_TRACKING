@@ -1,0 +1,32 @@
+i have using the command of the readme given by tanmi and arpita  and do the next my task 
+
+
+at first installing cloudinary for storage 
+npm install multer cloudinary
+
+update index.js using :
+// for uploading files and videos
+const uploadRoutes = require('./routes/upload.routes');
+app.use('/api/upload', uploadRoutes);
+
+.env.example modify using :
+# upload files
+CLOUDINARY_CLOUD_NAME=your_cloud_name
+CLOUDINARY_API_KEY=your_api_key
+CLOUDINARY_API_SECRET=your_api_secret
+
+// then i am creating files and do the tasks below one by one 
+
+git add student-backend/src/config/cloudinary.js
+git commit -m "feat(config): add Cloudinary configuration"
+
+git add student-backend/src/middleware/upload.middleware.js
+git commit -m "feat(upload): add multer-cloudinary middleware for video and materials"
+
+git add student-backend/src/controllers/uploadController.js student-backend/src/routes/upload.routes.js
+git commit -m "feat(upload): add video + material upload/delete endpoints via Cloudinary"
+
+getting bugs for multer cloudinary storage and so fix it :
+npm install multer streamifier
+
+git add student-backend/src/middleware/auth.middleware.js

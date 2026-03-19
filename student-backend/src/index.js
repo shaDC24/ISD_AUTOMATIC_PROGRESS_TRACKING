@@ -18,6 +18,11 @@ app.use('/api/auth', authRoutes);
 // const progressRoutes = require('./routes/progress_router');
 // app.use('/api/progress', progressRoutes);
 
+//uploading videos and files
+const uploadRoutes = require('./routes/upload.routes');
+app.use('/api/upload', uploadRoutes);
+
+
 // Health check
 app.get('/', (req, res) => {
     res.json({ message: 'Student Backend is running!' });

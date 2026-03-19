@@ -118,6 +118,7 @@ CREATE DATABASE progress_tracker;
 \c progress_tracker
 \i 'your_project_path/db/student-schema.sql'
 \i 'your_project_path/db/seed.sql'
+
 ```
 Replace `your_project_path` with your actual project path. Example for Windows:
 ```sql
