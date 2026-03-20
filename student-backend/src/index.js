@@ -22,6 +22,10 @@ app.use('/api/auth', authRoutes);
 const uploadRoutes = require('./routes/upload.routes');
 app.use('/api/upload', uploadRoutes);
 
+//video routes
+const videoRoutes = require('./routes/video.routes');
+app.use('/api/video', videoRoutes);
+
 
 // Health check
 app.get('/', (req, res) => {

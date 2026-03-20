@@ -39,3 +39,13 @@ now modify the seed.sql
 git commit -m "feat(db): add subtitle_url to video_lectures and table
 
 - subtitle_url supports VideoPlayer CC feature (Issue #2) "
+
+
+created student-backend/src/controllers/videoController.js
+git add student-backend/src/controllers/videoController.js
+git commit -m "feat(video): add getVideoUrl, getLastPosition, saveWatchPosition controllers"
+
+video.routes.js  →  student-backend/src/routes/ এ রাখো
+   index.js এ route add করো: app.use('/api/video', require('./routes/video.routes'));
+   git add student-backend/src/routes/video.routes.js student-backend/src/index.js
+   git commit -m "feat(video): register GET /url GET /last-position POST /watch-position routes"
