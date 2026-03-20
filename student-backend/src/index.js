@@ -26,6 +26,10 @@ app.use('/api/upload', uploadRoutes);
 const videoRoutes = require('./routes/video.routes');
 app.use('/api/video', videoRoutes);
 
+// Course content routes
+const courseRoutes = require('./routes/course.routes');
+app.use('/api/courses', courseRoutes);
+
 
 // Health check
 app.get('/', (req, res) => {
