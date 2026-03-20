@@ -8,6 +8,11 @@
  * - Save position every 10s + on pause
  * VideoPlayer v1 — Keyboard Shortcuts
  * Added: Space/K=play, ←→=seek 10s, ↑↓=volume, M=mute, F=fullscreen
+  * VideoPlayer v2 — 100% Completion Popup + Buffering Spinner
+ * Added on top of v1:
+ * - 100% (onEnded) → shows "Lecture Complete!" popup
+ * - 80% → isCompleted=true silently (sidebar updates, no popup)
+ * - Buffering spinner overlay
  */
 
 
@@ -26,15 +31,16 @@ export default function VideoPlayer({ videoIdProp, courseIdProp, studentIdProp, 
     const videoRef   = useRef(null);
     const wrapperRef = useRef(null);
 
-    const [videoData,   setVideoData]   = useState(null);
-    const [currentTime, setCurrentTime] = useState(0);
-    const [duration,    setDuration]    = useState(0);
-    const [isPlaying,   setIsPlaying]   = useState(false);
-    const [speed,       setSpeed]       = useState(1);
-    const [volume,      setVolume]      = useState(1);
-    const [isMuted,     setIsMuted]     = useState(false);
-    const [error,       setError]       = useState('');
-    const [pageLoading, setPageLoading] = useState(true);
+    const [videoData,    setVideoData]    = useState(null);
+    const [currentTime,  setCurrentTime]  = useState(0);
+    const [duration,     setDuration]     = useState(0);
+    const [isPlaying,    setIsPlaying]    = useState(false);
+    const [speed,        setSpeed]        = useState(1);
+    const [isMuted,      setIsMuted]      = useState(false);
+    const [isBuffering,  setIsBuffering]  = useState(false);
+    const [showPopup,    setShowPopup]    = useState(false); // 100% popup
+    const [error,        setError]        = useState('');
+    const [pageLoading,  setPageLoading]  = useState(true);
 
     const { lastPosition, isCompleted, loading: progressLoading,
             startTracking, stopTracking }
@@ -64,10 +70,22 @@ export default function VideoPlayer({ videoIdProp, courseIdProp, studentIdProp, 
         if (videoRef.current) setCurrentTime(videoRef.current.currentTime);
     };
 
-    const handlePlay  = () => { setIsPlaying(true);  startTracking(() => videoRef.current, onComplete); };
+    const handlePlay  = () => {
+        setIsPlaying(true);
+        // onSilentComplete → sidebar update only (no popup)
+        startTracking(() => videoRef.current, () => { if (onComplete) onComplete(); });
+    };
     const handlePause = () => { setIsPlaying(false); stopTracking(videoRef.current); };
-    const handleEnded = () => { setIsPlaying(false); stopTracking(videoRef.current); };
 
+    // 100% → video ended → show popup 🎉
+    const handleEnded = () => {
+        setIsPlaying(false);
+        stopTracking(videoRef.current);
+        setShowPopup(true); // ← popup only on 100%
+    };
+
+    const handleWaiting = () => setIsBuffering(true);
+    const handleCanPlay = () => setIsBuffering(false);
     const togglePlay = useCallback(() => {
         const v = videoRef.current;
         if (!v) return;
@@ -124,13 +142,14 @@ export default function VideoPlayer({ videoIdProp, courseIdProp, studentIdProp, 
     }, [togglePlay, seek, toggleMute, toggleFullscreen, changeVolume]);
 
     if (pageLoading || progressLoading)
-        return <div style={styles.center}><p style={{ color: '#9ca3af' }}>Loading...</p></div>;
+        return <div style={styles.center}><div style={styles.spinner} /></div>;
     if (error)
         return <div style={styles.center}><p style={{ color: '#ef4444' }}>{error}</p></div>;
 
     return (
         <div style={styles.page}>
             <h2 style={styles.title}>{videoData?.title || 'Video Lecture'}</h2>
+
             <div ref={wrapperRef} style={styles.videoWrapper}>
                 <video
                     ref={videoRef}
@@ -142,7 +161,33 @@ export default function VideoPlayer({ videoIdProp, courseIdProp, studentIdProp, 
                     onPlay={handlePlay}
                     onPause={handlePause}
                     onEnded={handleEnded}
+                    onWaiting={handleWaiting}
+                    onCanPlay={handleCanPlay}
+
                 />
+                {/* Buffering spinner */}
+                {isBuffering && (
+                    <div style={styles.bufferOverlay}>
+                        <div style={styles.spinner} />
+                    </div>
+                )}
+
+                {/* 100% Completion Popup */}
+                {showPopup && (
+                    <div style={styles.popupOverlay}>
+                        <div style={styles.popup}>
+                            <div style={styles.popupEmoji}>🎉</div>
+                            <h3 style={styles.popupTitle}>Lecture Complete!</h3>
+                            <p style={styles.popupText}>You have finished this lecture.</p>
+                            <button
+                                onClick={() => setShowPopup(false)}
+                                style={styles.popupBtn}
+                            >
+                                Continue
+                            </button>
+                        </div>
+                    </div>
+                )}
             </div>
 
             <ProgressBar currentTime={currentTime} duration={duration}
@@ -187,6 +232,14 @@ const styles = {
     title:        { fontSize: '1.3rem', marginBottom: '1rem' },
     videoWrapper: { position: 'relative', backgroundColor: '#000', borderRadius: '8px', overflow: 'hidden' },
     video:        { width: '100%', display: 'block', maxHeight: '480px' },
+    bufferOverlay:{ position: 'absolute', inset: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', backgroundColor: 'rgba(0,0,0,0.4)' },
+    spinner:      { width: '40px', height: '40px', border: '4px solid rgba(255,255,255,0.2)', borderTop: '4px solid #7c3aed', borderRadius: '50%', animation: 'spin 0.8s linear infinite' },
+    popupOverlay: { position: 'absolute', inset: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', backgroundColor: 'rgba(0,0,0,0.7)' },
+    popup:        { backgroundColor: '#1f2937', border: '1px solid #7c3aed', borderRadius: '16px', padding: '2rem', textAlign: 'center', minWidth: '280px' },
+    popupEmoji:   { fontSize: '48px', marginBottom: '0.5rem' },
+    popupTitle:   { color: '#f9fafb', fontSize: '1.4rem', fontWeight: '700', margin: '0 0 0.5rem' },
+    popupText:    { color: '#9ca3af', fontSize: '14px', margin: '0 0 1.5rem' },
+    popupBtn:     { padding: '10px 28px', backgroundColor: '#7c3aed', color: '#fff', border: 'none', borderRadius: '8px', fontSize: '15px', fontWeight: '600', cursor: 'pointer' },
     controls:     { display: 'flex', alignItems: 'center', gap: '8px', marginTop: '10px', flexWrap: 'wrap' },
     playBtn:      { padding: '8px 16px', backgroundColor: '#7c3aed', color: '#fff', border: 'none', borderRadius: '6px', fontSize: '18px', cursor: 'pointer' },
     iconBtn:      { background: 'none', border: 'none', color: '#d1d5db', fontSize: '18px', cursor: 'pointer', padding: '4px' },
