@@ -31,6 +31,7 @@ app.use('/api/courses', courseRoutes);
 
 
 
+
 // Health check
 app.get('/', (req, res) => {
     res.json({ message: 'Student Backend is running!' });
