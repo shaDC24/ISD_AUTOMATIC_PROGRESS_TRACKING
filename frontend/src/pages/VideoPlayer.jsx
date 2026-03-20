@@ -13,6 +13,11 @@
  * - 100% (onEnded) → shows "Lecture Complete!" popup
  * - 80% → isCompleted=true silently (sidebar updates, no popup)
  * - Buffering spinner overlay
+  * VideoPlayer v3 — Volume Slider + Mute Button
+ * Added on top of v2:
+ * - Volume slider (0–100%)
+ * - Mute/Unmute button with icon
+ * - Volume icon changes: 🔇 🔉 🔊
  */
 
 
@@ -36,6 +41,7 @@ export default function VideoPlayer({ videoIdProp, courseIdProp, studentIdProp, 
     const [duration,     setDuration]     = useState(0);
     const [isPlaying,    setIsPlaying]    = useState(false);
     const [speed,        setSpeed]        = useState(1);
+    const [volume,       setVolume]       = useState(1);       // ← new
     const [isMuted,      setIsMuted]      = useState(false);
     const [isBuffering,  setIsBuffering]  = useState(false);
     const [showPopup,    setShowPopup]    = useState(false); // 100% popup
@@ -104,6 +110,15 @@ export default function VideoPlayer({ videoIdProp, courseIdProp, studentIdProp, 
         v.muted = !v.muted;
         setIsMuted(v.muted);
     }, []);
+    const handleVolumeSlider = (e) => {
+        const val = parseFloat(e.target.value);
+        setVolume(val);
+        if (videoRef.current) {
+            videoRef.current.volume = val;
+            videoRef.current.muted  = val === 0;
+            setIsMuted(val === 0);
+        }
+    };    
 
     const changeVolume = useCallback((delta) => {
         const v = videoRef.current;
@@ -111,8 +126,8 @@ export default function VideoPlayer({ videoIdProp, courseIdProp, studentIdProp, 
         const newVol = Math.max(0, Math.min(v.volume + delta, 1));
         v.volume = newVol;
         setVolume(newVol);              // ← React state update
-        setIsMuted(newVol === 0);       // ← mute state update
-        if (newVol > 0) v.muted = false; // ← unmute if volume increases
+        if (newVol === 0) setIsMuted(true);
+        else setIsMuted(false);
     }, []);
 
     const toggleFullscreen = useCallback(() => {
@@ -190,20 +205,45 @@ export default function VideoPlayer({ videoIdProp, courseIdProp, studentIdProp, 
                 )}
             </div>
 
-            <ProgressBar currentTime={currentTime} duration={duration}
+            <ProgressBar
+                currentTime={currentTime}
+                duration={duration}
                 onSeek={(t) => { if (videoRef.current) videoRef.current.currentTime = t; }}
-                isCompleted={isCompleted} />
+                isCompleted={isCompleted}
+            />
 
+            {/* Controls row */}
             <div style={styles.controls}>
+                {/* Play/Pause */}
                 <button onClick={togglePlay} style={styles.playBtn}>
                     {isPlaying ? '⏸' : '▶'}
                 </button>
+                {/* Mute button + Volume slider (new in v3) */}
+                <button onClick={toggleMute} style={styles.iconBtn} title="Mute (M)">
+                    {isMuted || volume === 0 ? '🔇' : volume < 0.5 ? '🔉' : '🔊'}
+                </button>
+                <input
+                    type="range"
+                    min="0" max="1" step="0.05"
+                    value={isMuted ? 0 : volume}
+                    onChange={handleVolumeSlider}
+                    style={styles.volSlider}
+                    title="Volume"
+                />                
                 <div style={{ flex: 1 }} />
                 <label style={styles.label}>Speed</label>
-                <select value={speed}
-                    onChange={(e) => { const v = parseFloat(e.target.value); setSpeed(v); if (videoRef.current) videoRef.current.playbackRate = v; }}
-                    style={styles.select}>
-                    {[0.5, 0.75, 1, 1.25, 1.5, 2].map(s => <option key={s} value={s}>{s}×</option>)}
+                <select
+                    value={speed}
+                    onChange={(e) => {
+                        const val = parseFloat(e.target.value);
+                        setSpeed(val);
+                        if (videoRef.current) videoRef.current.playbackRate = val;
+                    }}
+                    style={styles.select}
+                >
+                    {[0.5, 0.75, 1, 1.25, 1.5, 2].map(s => (
+                        <option key={s} value={s}>{s}×</option>
+                    ))}
                 </select>
                 <button onClick={toggleFullscreen} style={styles.iconBtn} title="Fullscreen (F)">⛶</button>
             </div>
@@ -243,6 +283,7 @@ const styles = {
     controls:     { display: 'flex', alignItems: 'center', gap: '8px', marginTop: '10px', flexWrap: 'wrap' },
     playBtn:      { padding: '8px 16px', backgroundColor: '#7c3aed', color: '#fff', border: 'none', borderRadius: '6px', fontSize: '18px', cursor: 'pointer' },
     iconBtn:      { background: 'none', border: 'none', color: '#d1d5db', fontSize: '18px', cursor: 'pointer', padding: '4px' },
+    volSlider:    { width: '80px', cursor: 'pointer', accentColor: '#7c3aed' },    
     label:        { color: '#9ca3af', fontSize: '12px' },
     select:       { backgroundColor: '#1f2937', color: '#f9fafb', border: '1px solid #4b5563', borderRadius: '6px', padding: '4px 8px', fontSize: '12px', cursor: 'pointer' },
     shortcuts:    { marginTop: '10px', fontSize: '11px', color: '#6b7280', display: 'flex', gap: '6px', alignItems: 'center', flexWrap: 'wrap' },
