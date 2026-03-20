@@ -49,3 +49,30 @@ video.routes.js  →  student-backend/src/routes/ এ রাখো
    index.js এ route add করো: app.use('/api/video', require('./routes/video.routes'));
    git add student-backend/src/routes/video.routes.js student-backend/src/index.js
    git commit -m "feat(video): register GET /url GET /last-position POST /watch-position routes"
+
+
+   
+   useVideoProgress.js  →  frontend/src/hooks/ এ রাখো
+   git add frontend/src/hooks/useVideoProgress.js
+   git commit -m "feat(hooks): add useVideoProgress — 10s tracking + 80% threshold + resume"
+
+    ProgressBar.jsx  →  frontend/src/components/ এ রাখো
+   git add frontend/src/components/ProgressBar.jsx
+   git commit -m "feat(ui): add ProgressBar component with seek and completion indicator"
+
+
+   VideoPlayer.jsx  →  frontend/src/pages/ এ রাখো
+   App.jsx এ route add করো
+   git add frontend/src/pages/VideoPlayer.jsx frontend/src/App.jsx
+   git commit -m "feat(ui): add VideoPlayer base — load Cloudinary URL, resume, play/pause, speed"
+
+
+   CourseContentPage.jsx  →  frontend/src/pages/ এ রাখো
+   git add frontend/src/pages/CourseContentPage.jsx 
+   git commit -m "feat(ui): add CourseContentPage with sidebar lecture list + progress tracking"
+
+   git push origin shatabdi/frontend-pages
+
+
+git add student-backend/src/routes/course.routes.js student-backend/src/index.js
+git commit -m "feat(course): register GET /api/courses/:courseId/lectures route"
