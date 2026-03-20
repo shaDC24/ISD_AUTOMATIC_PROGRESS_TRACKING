@@ -15,12 +15,17 @@ const getVideoUrl = async (req, res) => {
         if (result.rows.length === 0) {
             return res.status(404).json({ message: 'Video not found' });
         }
+        
 
         const lecture = result.rows[0];
+        const streamUrl = lecture.video_url.replace(
+            '/upload/',
+            '/upload/f_auto,q_auto/'
+        );        
         res.status(200).json({
             lectureId: lecture.id,
             title:     lecture.title,
-            url:       lecture.video_url,
+            url:       streamUrl,
             duration:  parseFloat(lecture.duration),
         });
 
