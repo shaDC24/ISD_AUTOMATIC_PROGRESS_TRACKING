@@ -7,7 +7,7 @@
 
 | Student ID | Name                       | Role                        |
 |------------|----------------------------|-----------------------------|
-| 2105123    | Shatabdi Dutta Chowdhury   | Student UI + Video API + DevOps |
+| 2105123    | Shatabdi Dutta Chowdhury   | Student UI + Video API   |
 | 2105124    | Md. Shadman Abid            | Instructor DevOps + Student Progress UI |
 | 2105125    | Md. Yousuf Niaz             | Instructor Analytics UI + API |
 | 2105137    | Arpita Dhar                 | Student Progress API + DB Models |
@@ -20,9 +20,10 @@
 
 | Layer      | Technology                        |
 |------------|-----------------------------------|
-| Frontend   | React 18, Vite, Recharts          |
+| Frontend   | React 18, Vite                    |
 | Backend    | Node.js, Express.js               |
 | Database   | PostgreSQL 16                     |
+| Storage    | Cloudinary (videos + materials)   |
 | DevOps     | Docker, Docker Compose            |
 | CI/CD      | GitHub Actions                    |
 
@@ -40,30 +41,50 @@ ISD_AUTOMATIC_PROGRESS_TRACKING/
 │   ├── package-lock.json
 │   ├── .gitignore
 │   └── src/
-│       ├── App.jsx
+│       ├── App.jsx                        (Tanmi + Shatabdi adds routes)
 │       ├── main.jsx
 │       ├── pages/
-│       │   ├── Login.jsx
-│       │   └── Register.jsx
+│       │   ├── Login.jsx                  (Tanmi)
+│       │   ├── Register.jsx               (Tanmi)
+│       │   ├── VideoPlayer.jsx            (Shatabdi)
+│       │   └── CourseContentPage.jsx      (Shatabdi)
+│       ├── components/
+│       │   ├── ProgressBar.jsx            (Shatabdi)
+│       │   └── CircularProgress.jsx       (Shatabdi)
+│       ├── hooks/
+│       │   └── useVideoProgress.js        (Shatabdi)
 │       └── services/
-│           └── api.js
+│           └── api.js                     (Tanmi)     
 │
 ├── student-backend/
 │   ├── package.json
 │   ├── package-lock.json
 │   ├── .gitignore
 │   └── src/
-│       ├── index.js
-│       ├── db.js
-│       ├── routes/
-│       │   └── auth.routes.js
-│       └── controllers/
-│           └── authController.js
+│       ├── index.js                       (Tanmi + Shatabdi routes added)
+│       ├── db.js                          (Tanmi)
+│       ├── config/
+│       │   └── cloudinary.js              (Shatabdi)
+│       ├── middleware/
+│       │   ├── auth.middleware.js         (Shatabdi)
+│       │   └── upload.middleware.js       (Shatabdi)
+│       ├── controllers/
+│       │   ├── authController.js          (Tanmi)
+│       │   ├── videoController.js         (Shatabdi)
+│       │   ├── courseController.js        (Shatabdi)
+│       │   ├── uploadController.js        (Shatabdi)
+│       │   └── progressController.js      (Arpita)
+│       └── routes/
+│           ├── auth.routes.js             (Tanmi)
+│           ├── video.routes.js            (Shatabdi)
+│           ├── course.routes.js           (Shatabdi)
+│           ├── upload.routes.js           (Shatabdi)
+│           └── progress_router.js         (Arpita)
 │
 ├── db/
-│   ├── student-schema.sql
-│   ├── instructor-schema.sql
-│   └── seed.sql
+│   ├── student-schema.sql                 (Tanmi + Shatabdi: subtitle_url)
+│   ├── instructor-schema.sql              (Tanmi)
+│   └── seed.sql                           (Tanmi + Shatabdi: real datas)
 │
 ├── .gitignore
 ├── .env.example
@@ -92,7 +113,7 @@ cd ISD_AUTOMATIC_PROGRESS_TRACKING
 ```bash
 cp .env.example student-backend/.env
 ```
-Open `student-backend/.env` and fill in your PostgreSQL password:
+Open `student-backend/.env` and fill in your values:
 ```env
 POSTGRES_USER=postgres
 POSTGRES_PASSWORD=your_actual_postgres_password
@@ -105,19 +126,26 @@ VITE_INSTRUCTOR_API_URL=http://localhost:5001/api
 JWT_SECRET=mysecretjwtkey123
 JWT_EXPIRES_IN=7d
 NODE_ENV=development
+
+# Cloudinary — required for video and material upload (Shatabdi)
+CLOUDINARY_CLOUD_NAME=your_cloud_name
+CLOUDINARY_API_KEY=your_api_key
+CLOUDINARY_API_SECRET=your_api_secret
 ```
 
 ### Step 3 — Setup Database
 Open PostgreSQL terminal:
 ```bash
-psql -U postgres
+psql -U postgres -c "CREATE DATABASE progress_tracker;"
 ```
 Then run:
 ```sql
-CREATE DATABASE progress_tracker;
-\c progress_tracker
-\i 'your_project_path/db/student-schema.sql'
-\i 'your_project_path/db/seed.sql'
+-- CREATE DATABASE progress_tracker;
+-- \c progress_tracker
+-- \i 'your_project_path/db/student-schema.sql'
+-- \i 'your_project_path/db/seed.sql'
+psql -U postgres -d progress_tracker -f db/student-schema.sql
+psql -U postgres -d progress_tracker -f db/seed.sql
 
 ```
 Replace `your_project_path` with your actual project path. Example for Windows:
@@ -125,20 +153,24 @@ Replace `your_project_path` with your actual project path. Example for Windows:
 \i 'C:/Users/YourName/Downloads/ISD_AUTOMATIC_PROGRESS_TRACKING/db/student-schema.sql'
 \i 'C:/Users/YourName/Downloads/ISD_AUTOMATIC_PROGRESS_TRACKING/db/seed.sql'
 ```
+> `seed.sql` uses `TRUNCATE ... RESTART IDENTITY CASCADE` — safe to re-run any number of times.
+### Step 4 — Install Dependencies
+```bash
+cd student-backend && npm install
+cd ../frontend && npm install
+```
 
-### Step 4 — Run Student Backend
+### Step 5 — Run Student Backend
 ```bash
 cd student-backend
-npm install
 npm run dev
 ```
 Backend runs at: `http://localhost:5000`
 
-### Step 5 — Run Frontend
+### Step 6 — Run Frontend
 Open a new terminal:
 ```bash
 cd frontend
-npm install
 npm run dev
 ```
 Frontend runs at: `http://localhost:5173`
@@ -152,13 +184,9 @@ All seed users have password: `password123`
 | Name             | Email              | Role       |
 |------------------|--------------------|------------|
 | Instructor Karim | karim@test.com     | instructor |
-| Instructor Nadia | nadia@test.com     | instructor |
-| Shatabdi         | shatabdi@test.com  | student    |
-| Shadman          | shadman@test.com   | student    |
-| Tanmi            | tanmi@test.com     | student    |
-| Arpita           | arpita@test.com    | student    |
-| Tamanna          | tamanna@test.com   | student    |
-| Niaz             | niaz@test.com      | student    |
+| Student Shatabdi | shatabdi@test.com  | student    |
+| Student Shadman  | shadman@test.com   | student    |
+| Student Tanmi    | tanmi@test.com     | student    |
 
 ---
 
@@ -171,6 +199,13 @@ All seed users have password: `password123`
 |--------|------------------|-------------------|-------|
 | POST   | `/auth/register` | Register new user | Tanmi |
 | POST   | `/auth/login`    | Login user        | Tanmi |
+| GET    | `/video/:lectureId/url`              | Cloudinary video URL + metadata | Shatabdi |
+| GET    | `/video/last-position/:lectureId`    | Last watched position for resume | Shatabdi |
+| POST   | `/video/watch-position`             | Save current position (every 10s) | Shatabdi |
+| GET    | `/courses/:courseId/lectures`       | All lectures + materials for a course | Shatabdi |
+| POST   | `/upload/video`              | Upload video to Cloudinary | Shatabdi |
+| POST   | `/upload/material`           | Upload PDF/ZIP/PPT to Cloudinary | Shatabdi |
+| DELETE | `/upload/video/:lectureId`   | Delete from Cloudinary + DB | Shatabdi |
 
 ---
 
@@ -214,6 +249,7 @@ id          SERIAL PRIMARY KEY
 section_id  INT NOT NULL REFERENCES sections(id) ON DELETE CASCADE
 title       VARCHAR(200) NOT NULL
 video_url   VARCHAR(500) NOT NULL
+subtitle_url DEFAULT NULL 
 duration    NUMERIC(10,2) NOT NULL DEFAULT 0
 position    INT NOT NULL DEFAULT 1
 created_at  TIMESTAMP DEFAULT NOW()
@@ -271,6 +307,7 @@ material_id INT NOT NULL REFERENCES materials(id) ON DELETE CASCADE
 accessed_at TIMESTAMP DEFAULT NOW()
 ```
 
+> See full schema in `db/student-schema.sql`
 ---
 
 ## Branch Strategy
@@ -282,7 +319,7 @@ Each member works on their own branch and opens a PR to `main`.
 | `tanmi/db-schema-auth`        | Tanmi    |
 | `student/video-player`        | Shatabdi |
 | `student/progress-api`        | Arpita   |
-| `student/devops`              | Shatabdi |
+| `student/devops`              | Shadman  |
 | `instructor/analytics-ui`     | Niaz     |
 | `instructor/threshold-api`    | Tamanna  |
 | `instructor/devops`           | Shadman  |
@@ -291,11 +328,11 @@ Each member works on their own branch and opens a PR to `main`.
 
 ## Contribution Summary
 
-| Member   | Frontend files                           | Backend files                                      | DB / Config                                                        |
-|----------|------------------------------------------|----------------------------------------------------|--------------------------------------------------------------------|
-| Tanmi    | Login.jsx, Register.jsx, App.jsx, api.js | index.js, db.js, auth.routes.js, authController.js | student-schema.sql, instructor-schema.sql, seed.sql, .env.example |
-| Shatabdi | —                                        | —                                                  | —                                                                  |
-| Arpita   | —                                        | —                                                  | —                                                                  |
-| Shadman  | —                                        | —                                                  | —                                                                  |
-| Niaz     | —                                        | —                                                  | —                                                                  |
-| Tamanna  | —                                        | —                                                  | —                                                                  |
+| Member   | Frontend | Backend | DB / Config |
+|----------|----------|---------|-------------|
+| Tanmi    | Login.jsx, Register.jsx, App.jsx, api.js | index.js, db.js, authController.js, auth.routes.js | student-schema.sql, seed.sql, .env.example |
+| Shatabdi | VideoPlayer.jsx, CourseContentPage.jsx, ProgressBar.jsx, CircularProgress.jsx, useVideoProgress.js | auth.middleware.js, videoController.js, courseController.js, uploadController.js, upload.middleware.js, cloudinary.js, video/course/upload routes | subtitle_url + reviews in schema, Cloudinary URLs in seed.sql |
+| Arpita   | — | progressController.js, progress_router.js | — |
+| Shadman  | — | — | — |
+| Niaz     | — | — | — |
+| Tamanna  | — | — | — |
