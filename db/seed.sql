@@ -2,9 +2,12 @@
 -- Udemy Course Management System
 -- Seed Data (INSERT only — schema in init.sql)
 -- CSE 326: ISD Sessional | Group C1_4
--- Run AFTER init.sql
 -- ============================================
- 
+ TRUNCATE TABLE
+    material_access, reviews, course_progress,
+    video_progress, enrollments, materials,
+    video_lectures, sections, courses, users
+RESTART IDENTITY CASCADE;
 -- ============================================
 -- 1. USERS
 -- Password for ALL: "password123"
@@ -88,42 +91,37 @@ INSERT INTO video_lectures (section_id, title, video_url, subtitle_url, duration
  
 -- ============================================
 -- 5. MATERIALS
--- Files stored in Cloudinary under
--- FINAL_ISD_PROJECT/resources/
--- Replace public_id with full URL pattern:
--- <public_id>
+-- Using real publicly available PDFs for demo
+-- Replace with actual Cloudinary URLs later
 -- ============================================
 INSERT INTO materials (section_id, title, file_url, file_type, download_allowed) VALUES
-(1, 'Chapter 2 Lecture Slides',
-    'FINAL_ISD_PROJECT/resources/Chapter_204_20-_20MAC-1.pdf',
+ 
+(1, 'Chapter 1 - Lecture Slides (PDF)',
+    'https://www.rfc-editor.org/rfc/pdfrfc/rfc5681.txt.pdf',
     'pdf', TRUE),
-
-(2, 'Chapter 5 Slides',
-    'FINAL_ISD_PROJECT/resources/chapter5.ppt',
-    'ppt', TRUE),
-
-(2, 'Chapter 6 Slides',
-    'FINAL_ISD_PROJECT/resources/chapter6.ppt',
-    'ppt', TRUE),
-
-(3, 'Congestion Control Notes',
-    'FINAL_ISD_PROJECT/resources/Congestion_control_-_Peterson.pdf',
+ 
+(2, 'Chapter 2 - Direct Link Networks (PDF)',
+    'https://www.rfc-editor.org/rfc/pdfrfc/rfc5681.txt.pdf',
     'pdf', TRUE),
-
-(4, 'Lecture Notes: TCP',
-    'FINAL_ISD_PROJECT/resources/Lecture-TCP.pdf',
+ 
+(2, 'Chapter 2 - Error Detection Notes (PDF)',
+    'https://www.rfc-editor.org/rfc/pdfrfc/rfc5681.txt.pdf',
     'pdf', TRUE),
-
-(4, 'Lecture Notes: TCP Connections',
-    'FINAL_ISD_PROJECT/resources/Lecture-TCPCongestionControl.pdf',
+ 
+(3, 'Chapter 4 - Congestion Control Notes (PDF)',
+    'https://www.rfc-editor.org/rfc/pdfrfc/rfc5681.txt.pdf',
     'pdf', TRUE),
-
-(4, 'Course Material Pack (ZIP)',
-    'FINAL_ISD_PROJECT/resources/material.zip',
-    'zip', TRUE),
-
-(5, 'Textbook Reference: Peterson & Davie',
-    'FINAL_ISD_PROJECT/resources/TCP_-_Peterson.pdf',
+ 
+(4, 'TCP Protocol Reference (PDF)',
+    'https://www.rfc-editor.org/rfc/pdfrfc/rfc793.txt.pdf',
+    'pdf', TRUE),
+ 
+(4, 'TCP Connection Management Notes (PDF)',
+    'https://www.rfc-editor.org/rfc/pdfrfc/rfc793.txt.pdf',
+    'pdf', TRUE),
+ 
+(5, 'TCP Congestion Control Reference (PDF)',
+    'https://www.rfc-editor.org/rfc/pdfrfc/rfc5681.txt.pdf',
     'pdf', FALSE);
  
 -- ============================================
@@ -148,10 +146,13 @@ ON CONFLICT DO NOTHING;
 -- ============================================
 -- 8. COURSE PROGRESS (initial rows, all zero)
 -- ============================================
-INSERT INTO course_progress (student_id, course_id, completion_percentage, completed_lectures, total_lectures) VALUES
-(2, 1, 30.00, 3, 10),
-(3, 1, 10.00, 1, 10),
-(4, 1, 50.00, 5, 10),
+
+INSERT INTO course_progress
+    (student_id, course_id, completion_percentage, completed_lectures, total_lectures)
+VALUES
+(2, 1, 0.00, 0, 10),
+(3, 1, 0.00, 0, 10),
+(4, 1, 0.00, 0, 10),
 (2, 2, 0.00, 0, 3),
 (4, 2, 0.00, 0, 3)
 ON CONFLICT DO NOTHING;
