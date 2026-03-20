@@ -1,3 +1,15 @@
+/**
+ * useVideoProgress
+ * Features:
+ * 1. Resume from last position on load
+ * 2. Save position every 10s while playing
+ * 3. Save immediately on pause
+ * 4. Save on tab close (beforeunload)
+ * 5. Offline fallback to localStorage
+ * 6. Notify /progress/complete at 80% threshold
+ */
+
+
 import { useState, useEffect, useRef, useCallback } from 'react';
 import studentAPI from '../services/api';
 
@@ -44,14 +56,13 @@ export default function useVideoProgress({ videoId, courseId, studentId }) {
             // Offline — localStorage backup already saved
         }
 
-        // 80% threshold → notify Arpita's /progress/complete API
-        // Arpita's controller expects: { lectureId, courseId, percentage }
+        // 80% threshold → notify /progress/complete API
         if (!hasNotified80Ref.current && position / duration >= 0.8) {
             hasNotified80Ref.current = true;
             try {
                 const percentage = Math.round((position / duration) * 100);
                 await studentAPI.post('/progress/complete', {
-                    lectureId:  videoId,   // Arpita uses lectureId (same as videoId here)
+                    lectureId:  videoId,   // use lectureId (same as videoId here)
                     courseId,
                     percentage,
                 });

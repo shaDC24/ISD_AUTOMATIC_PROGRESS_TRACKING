@@ -1,3 +1,12 @@
+/**
+ * ProgressBar
+ * Features:
+ * 1. Clickable seek bar
+ * 2. 80% completion marker line
+ * 3. Hover tooltip showing time at cursor position
+ * 4. Animated thumb that grows on hover
+ * 5. Color shifts purple → green when completed
+ */
 import { useRef, useState } from 'react';
 export default function ProgressBar({ currentTime, duration, onSeek, isCompleted }) {
     const barRef       = useRef(null);
