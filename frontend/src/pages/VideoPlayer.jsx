@@ -6,112 +6,197 @@
  * - Play/Pause + Speed
  * - ProgressBar with seek
  * - Save position every 10s + on pause
+ * VideoPlayer v1 — Keyboard Shortcuts
+ * Added: Space/K=play, ←→=seek 10s, ↑↓=volume, M=mute, F=fullscreen
+  * VideoPlayer v2 — 100% Completion Popup + Buffering Spinner
+ * Added on top of v1:
+ * - 100% (onEnded) → shows "Lecture Complete!" popup
+ * - 80% → isCompleted=true silently (sidebar updates, no popup)
+ * - Buffering spinner overlay
+  * VideoPlayer v3 — Volume Slider + Mute Button
+ * Added on top of v2:
+ * - Volume slider (0–100%)
+ * - Mute/Unmute button with icon
+ * - Volume icon changes: 🔇 🔉 🔊
  */
 
-import { useRef, useState, useEffect } from 'react';
+
+import { useRef, useState, useEffect, useCallback } from 'react';
 import ProgressBar from '../components/ProgressBar';
 import useVideoProgress from '../hooks/useVideoProgress';
 import studentAPI from '../services/api';
 
 
-
-export default function VideoPlayer({ videoIdProp, courseIdProp, studentIdProp, onComplete }) {
+export default function VideoPlayer({ videoIdProp, courseIdProp, studentIdProp, onComplete, onNextLecture }) {
     const user      = JSON.parse(localStorage.getItem('user') || '{}');
     const videoId   = videoIdProp;
     const courseId  = courseIdProp;
     const studentId = studentIdProp || user.id;
 
-    const videoRef  = useRef(null);
+    const videoRef   = useRef(null);
+    const wrapperRef = useRef(null);
 
-    const [videoData,   setVideoData]   = useState(null);
-    const [currentTime, setCurrentTime] = useState(0);
-    const [duration,    setDuration]    = useState(0);
-    const [isPlaying,   setIsPlaying]   = useState(false);
-    const [speed,       setSpeed]       = useState(1);
-    const [error,       setError]       = useState('');
-    const [pageLoading, setPageLoading] = useState(true);
+    const [videoData,    setVideoData]    = useState(null);
+    const [currentTime,  setCurrentTime]  = useState(0);
+    const [duration,     setDuration]     = useState(0);
+    const [isPlaying,    setIsPlaying]    = useState(false);
+    const [speed,        setSpeed]        = useState(1);
+    const [volume,       setVolume]       = useState(1);       // ← new
+    const [isMuted,      setIsMuted]      = useState(false);
+    const [isBuffering,  setIsBuffering]  = useState(false);
+    const [showPopup,    setShowPopup]    = useState(false); // 100% popup
+    const [countdown,    setCountdown]    = useState(null); // 5s auto-advance
+    const countdownRef   = useRef(null);
+    const [error,        setError]        = useState('');
+    const [pageLoading,  setPageLoading]  = useState(true);
 
     const { lastPosition, isCompleted, loading: progressLoading,
             startTracking, stopTracking }
         = useVideoProgress({ videoId, courseId, studentId });
 
-    // Load video URL
     useEffect(() => {
         if (!videoId) return;
         const fetchVideo = async () => {
             try {
                 const res = await studentAPI.get(`/video/${videoId}/url`);
                 setVideoData(res.data);
-            } catch (err) {
-                setError('Could not load video.');
-            } finally {
-                setPageLoading(false);
-            }
+            } catch { setError('Could not load video.'); }
+            finally { setPageLoading(false); }
         };
         fetchVideo();
     }, [videoId]);
 
-    // Resume from last position
     const handleLoadedMetadata = () => {
         const v = videoRef.current;
         if (!v) return;
         setDuration(v.duration);
-        if (lastPosition > 0 && lastPosition < v.duration - 5) {
+        if (lastPosition > 0 && lastPosition < v.duration - 5)
             v.currentTime = lastPosition;
-        }
     };
 
     const handleTimeUpdate = () => {
         if (videoRef.current) setCurrentTime(videoRef.current.currentTime);
     };
 
-    const handlePlay = () => {
+    const handlePlay  = () => {
         setIsPlaying(true);
-        startTracking(
-            () => videoRef.current,
-            () => { if (onComplete) onComplete(); }
-        );
+        // onSilentComplete → sidebar update only (no popup)
+        startTracking(() => videoRef.current, () => { if (onComplete) onComplete(); });
     };
+    const handlePause = () => { setIsPlaying(false); stopTracking(videoRef.current); };
 
-    const handlePause = () => {
-        setIsPlaying(false);
-        stopTracking(videoRef.current);
-    };
-
+    // 100% → video ended → show popup 🎉
     const handleEnded = () => {
         setIsPlaying(false);
         stopTracking(videoRef.current);
+        setShowPopup(true); // ← popup only on 100%
+
+        // Start 5s countdown for auto-advance
+        if (onNextLecture) {
+            setCountdown(5);
+            countdownRef.current = setInterval(() => {
+                setCountdown(prev => {
+                    if (prev <= 1) {
+                        clearInterval(countdownRef.current);
+                        setShowPopup(false);
+                        setCountdown(null);
+                        onNextLecture(); // advance to next lecture
+                        return null;
+                    }
+                    return prev - 1;
+                });
+            }, 1000);
+        }
     };
 
-    const togglePlay = () => {
+    const handleContinueNow = () => {
+        if (countdownRef.current) clearInterval(countdownRef.current);
+        setShowPopup(false);
+        setCountdown(null);
+        if (onNextLecture) onNextLecture();
+    };
+
+    const handleStayHere = () => {
+        if (countdownRef.current) clearInterval(countdownRef.current);
+        setShowPopup(false);
+        setCountdown(null);    };
+
+    const handleWaiting = () => setIsBuffering(true);
+    const handleCanPlay = () => setIsBuffering(false);
+    const togglePlay = useCallback(() => {
         const v = videoRef.current;
         if (!v) return;
         isPlaying ? v.pause() : v.play();
-    };
+    }, [isPlaying]);
 
-    const handleSeek = (newTime) => {
-        if (videoRef.current) videoRef.current.currentTime = newTime;
-    };
+    const seek = useCallback((delta) => {
+        const v = videoRef.current;
+        if (!v) return;
+        v.currentTime = Math.max(0, Math.min(v.currentTime + delta, v.duration));
+    }, []);
 
-    const handleSpeedChange = (e) => {
+    const toggleMute = useCallback(() => {
+        const v = videoRef.current;
+        if (!v) return;
+        v.muted = !v.muted;
+        setIsMuted(v.muted);
+    }, []);
+    const handleVolumeSlider = (e) => {
         const val = parseFloat(e.target.value);
-        setSpeed(val);
-        if (videoRef.current) videoRef.current.playbackRate = val;
-    };
+        setVolume(val);
+        if (videoRef.current) {
+            videoRef.current.volume = val;
+            videoRef.current.muted  = val === 0;
+            setIsMuted(val === 0);
+        }
+    };    
 
-    if (pageLoading || progressLoading) {
-        return <div style={styles.center}><p style={{ color: '#9ca3af' }}>Loading...</p></div>;
-    }
+    const changeVolume = useCallback((delta) => {
+        const v = videoRef.current;
+        if (!v) return;
+        const newVol = Math.max(0, Math.min(v.volume + delta, 1));
+        v.volume = newVol;
+        setVolume(newVol);              // ← React state update
+        if (newVol === 0) setIsMuted(true);
+        else setIsMuted(false);
+    }, []);
 
-    if (error) {
+    const toggleFullscreen = useCallback(() => {
+        const el = wrapperRef.current;
+        if (!el) return;
+        if (!document.fullscreenElement) el.requestFullscreen?.();
+        else document.exitFullscreen?.();
+    }, []);
+
+    // ── Keyboard shortcuts ────────────────────────────────────────────────────
+    useEffect(() => {
+        const handleKey = (e) => {
+            if (['INPUT', 'SELECT', 'TEXTAREA'].includes(e.target.tagName)) return;
+            switch (e.key) {
+                case ' ': case 'k': e.preventDefault(); togglePlay(); break;
+                case 'ArrowLeft':   e.preventDefault(); seek(-10);    break;
+                case 'ArrowRight':  e.preventDefault(); seek(10);     break;
+                case 'ArrowUp':     e.preventDefault(); changeVolume(0.1);  break;
+                case 'ArrowDown':   e.preventDefault(); changeVolume(-0.1); break;
+                case 'm': case 'M': e.preventDefault(); toggleMute();       break;
+                case 'f': case 'F': e.preventDefault(); toggleFullscreen();  break;
+                default: break;
+            }
+        };
+        window.addEventListener('keydown', handleKey);
+        return () => window.removeEventListener('keydown', handleKey);
+    }, [togglePlay, seek, toggleMute, toggleFullscreen, changeVolume]);
+
+    if (pageLoading || progressLoading)
+        return <div style={styles.center}><div style={styles.spinner} /></div>;
+    if (error)
         return <div style={styles.center}><p style={{ color: '#ef4444' }}>{error}</p></div>;
-    }
 
     return (
         <div style={styles.page}>
             <h2 style={styles.title}>{videoData?.title || 'Video Lecture'}</h2>
 
-            <div style={styles.videoWrapper}>
+            <div ref={wrapperRef} style={styles.videoWrapper}>
                 <video
                     ref={videoRef}
                     src={videoData?.url}
@@ -122,26 +207,99 @@ export default function VideoPlayer({ videoIdProp, courseIdProp, studentIdProp, 
                     onPlay={handlePlay}
                     onPause={handlePause}
                     onEnded={handleEnded}
+                    onWaiting={handleWaiting}
+                    onCanPlay={handleCanPlay}
+
                 />
+                {/* Buffering spinner */}
+                {isBuffering && (
+                    <div style={styles.bufferOverlay}>
+                        <div style={styles.spinner} />
+                    </div>
+                )}
+                {/* 100% Completion Popup with countdown */}
+                {showPopup && (
+                    <div style={styles.popupOverlay}>
+                        <div style={styles.popup}>
+                            <div style={styles.popupEmoji}>🎉</div>
+                            <h3 style={styles.popupTitle}>Lecture Complete!</h3>
+                            <p style={styles.popupText}>You have finished this lecture.</p>                
+
+                            {onNextLecture && countdown !== null ? (
+                                <>
+                                    <p style={styles.countdownText}>
+                                        Next lecture in <strong style={{ color: '#7c3aed' }}>{countdown}s</strong>
+                                    </p>
+                                    <div style={styles.popupBtns}>
+                                        <button onClick={handleContinueNow} style={styles.popupBtn}>
+                                            Next Now →
+                                        </button>
+                                        <button onClick={handleStayHere} style={styles.popupBtnOutline}>
+                                            Stay Here
+                                        </button>
+                                    </div>
+                                </>
+                            ) : (
+                                <button onClick={handleStayHere} style={styles.popupBtn}>
+                                    Continue
+                                </button>
+                            )}
+                        </div>
+                    </div>
+                )}
             </div>
 
             <ProgressBar
                 currentTime={currentTime}
                 duration={duration}
-                onSeek={handleSeek}
+                onSeek={(t) => { if (videoRef.current) videoRef.current.currentTime = t; }}
                 isCompleted={isCompleted}
             />
 
+            {/* Controls row */}
             <div style={styles.controls}>
+                {/* Play/Pause */}
                 <button onClick={togglePlay} style={styles.playBtn}>
-                    {isPlaying ? '⏸ Pause' : '▶ Play'}
+                    {isPlaying ? '⏸' : '▶'}
                 </button>
+                {/* Mute button + Volume slider (new in v3) */}
+                <button onClick={toggleMute} style={styles.iconBtn} title="Mute (M)">
+                    {isMuted || volume === 0 ? '🔇' : volume < 0.5 ? '🔉' : '🔊'}
+                </button>
+                <input
+                    type="range"
+                    min="0" max="1" step="0.05"
+                    value={isMuted ? 0 : volume}
+                    onChange={handleVolumeSlider}
+                    style={styles.volSlider}
+                    title="Volume"
+                />                
+                <div style={{ flex: 1 }} />
                 <label style={styles.label}>Speed</label>
-                <select value={speed} onChange={handleSpeedChange} style={styles.select}>
+                <select
+                    value={speed}
+                    onChange={(e) => {
+                        const val = parseFloat(e.target.value);
+                        setSpeed(val);
+                        if (videoRef.current) videoRef.current.playbackRate = val;
+                    }}
+                    style={styles.select}
+                >
                     {[0.5, 0.75, 1, 1.25, 1.5, 2].map(s => (
                         <option key={s} value={s}>{s}×</option>
                     ))}
                 </select>
+                <button onClick={toggleFullscreen} style={styles.iconBtn} title="Fullscreen (F)">⛶</button>
+            </div>
+
+            {/* Keyboard hint */}
+            <div style={styles.shortcuts}>
+                <span>⌨</span>
+                <code>Space</code> play/pause
+                <code>← →</code> seek 10s
+                <code>↑ ↓</code> volume
+                <code>M</code> mute
+                <code>F</code> fullscreen
             </div>
 
             {lastPosition > 0 && (
@@ -156,12 +314,26 @@ export default function VideoPlayer({ videoIdProp, courseIdProp, studentIdProp, 
 const styles = {
     page:         { maxWidth: '900px', margin: '0 auto', padding: '1.5rem', backgroundColor: '#111827', minHeight: '100vh', color: '#f9fafb' },
     title:        { fontSize: '1.3rem', marginBottom: '1rem' },
-    videoWrapper: { backgroundColor: '#000', borderRadius: '8px', overflow: 'hidden' },
+    videoWrapper: { position: 'relative', backgroundColor: '#000', borderRadius: '8px', overflow: 'hidden' },
     video:        { width: '100%', display: 'block', maxHeight: '480px' },
-    controls:     { display: 'flex', alignItems: 'center', gap: '12px', marginTop: '12px' },
-    playBtn:      { padding: '8px 20px', backgroundColor: '#7c3aed', color: '#fff', border: 'none', borderRadius: '6px', fontSize: '14px', fontWeight: '600', cursor: 'pointer' },
-    label:        { color: '#9ca3af', fontSize: '13px' },
-    select:       { backgroundColor: '#1f2937', color: '#f9fafb', border: '1px solid #4b5563', borderRadius: '6px', padding: '4px 8px', fontSize: '13px', cursor: 'pointer' },
+    bufferOverlay:{ position: 'absolute', inset: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', backgroundColor: 'rgba(0,0,0,0.4)' },
+    spinner:      { width: '40px', height: '40px', border: '4px solid rgba(255,255,255,0.2)', borderTop: '4px solid #7c3aed', borderRadius: '50%', animation: 'spin 0.8s linear infinite' },
+    popupOverlay: { position: 'absolute', inset: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', backgroundColor: 'rgba(0,0,0,0.7)' },
+    popup:        { backgroundColor: '#1f2937', border: '1px solid #7c3aed', borderRadius: '16px', padding: '2rem', textAlign: 'center', minWidth: '280px' },
+    popupEmoji:   { fontSize: '48px', marginBottom: '0.5rem' },
+    popupTitle:   { color: '#f9fafb', fontSize: '1.4rem', fontWeight: '700', margin: '0 0 0.5rem' },
+    popupText:    { color: '#9ca3af', fontSize: '14px', margin: '0 0 1.5rem' },
+    popupBtn:     { padding: '10px 28px', backgroundColor: '#7c3aed', color: '#fff', border: 'none', borderRadius: '8px', fontSize: '15px', fontWeight: '600', cursor: 'pointer' },
+    controls:     { display: 'flex', alignItems: 'center', gap: '8px', marginTop: '10px', flexWrap: 'wrap' },
+    playBtn:      { padding: '8px 16px', backgroundColor: '#7c3aed', color: '#fff', border: 'none', borderRadius: '6px', fontSize: '18px', cursor: 'pointer' },
+    iconBtn:      { background: 'none', border: 'none', color: '#d1d5db', fontSize: '18px', cursor: 'pointer', padding: '4px' },
+    volSlider:    { width: '80px', cursor: 'pointer', accentColor: '#7c3aed' },    
+    label:        { color: '#9ca3af', fontSize: '12px' },
+    select:       { backgroundColor: '#1f2937', color: '#f9fafb', border: '1px solid #4b5563', borderRadius: '6px', padding: '4px 8px', fontSize: '12px', cursor: 'pointer' },
+    shortcuts:    { marginTop: '10px', fontSize: '11px', color: '#6b7280', display: 'flex', gap: '6px', alignItems: 'center', flexWrap: 'wrap' },
     resumeNote:   { color: '#9ca3af', fontSize: '12px', marginTop: '8px' },
-    center:       { display: 'flex', justifyContent: 'center', alignItems: 'center', height: '400px', backgroundColor: '#111827' },
+    center:        { display: 'flex', justifyContent: 'center', alignItems: 'center', height: '400px', backgroundColor: '#111827' },
+    countdownText: { color: '#9ca3af', fontSize: '14px', margin: '0 0 1rem' },
+    popupBtns:     { display: 'flex', gap: '8px', justifyContent: 'center' },
+    popupBtnOutline: { padding: '10px 20px', backgroundColor: 'transparent', color: '#9ca3af', border: '1px solid #4b5563', borderRadius: '8px', fontSize: '14px', fontWeight: '600', cursor: 'pointer' },
 };

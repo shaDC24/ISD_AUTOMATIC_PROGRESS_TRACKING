@@ -7,12 +7,16 @@
  * 4. Save on tab close (beforeunload)
  * 5. Offline fallback to localStorage
  * 6. Notify /progress/complete at 80% threshold
+ * 
+ * Logic:
+ * - 80% watched → silently mark complete (Arpita's API) + update sidebar instantly
+ * - 100% (video ended) → VideoPlayer shows popup (handled outside hook)
+ * - Save every 10s + on pause + on tab close
  */
 
 
 import { useState, useEffect, useRef, useCallback } from 'react';
 import studentAPI from '../services/api';
-
 export default function useVideoProgress({ videoId, courseId, studentId }) {
     const [lastPosition, setLastPosition] = useState(0);
     const [isCompleted,  setIsCompleted]  = useState(false);
@@ -25,7 +29,7 @@ export default function useVideoProgress({ videoId, courseId, studentId }) {
     // ── 1. Fetch last position on mount ──────────────────────────────────────
     useEffect(() => {
         if (!videoId) return;
-        const fetchLastPosition = async () => {
+        const fetch = async () => {
             try {
                 const res = await studentAPI.get(`/video/last-position/${videoId}`);
                 setLastPosition(res.data.position || 0);
@@ -38,53 +42,51 @@ export default function useVideoProgress({ videoId, courseId, studentId }) {
                 setLoading(false);
             }
         };
-        fetchLastPosition();
+        fetch();
     }, [videoId]);
 
     // ── 2. Core save function ─────────────────────────────────────────────────
     const savePosition = useCallback(async (video) => {
-        if (!video || !video.duration || video.duration === 0) return;
+        if (!video || !video.duration || video.duration === 0) return null;
         const position = video.currentTime;
         const duration = video.duration;
 
-        // Always save to localStorage as backup
         localStorage.setItem(`vp_${videoId}`, position.toString());
 
         try {
-            await studentAPI.post('/video/watch-position', { lectureId: videoId, position, duration });
-        } catch {
-            // Offline — localStorage backup already saved
-        }
+            await studentAPI.post('/video/watch-position', {
+                lectureId: videoId, position, duration,
+            });
+        } catch { /* offline — localStorage saved */ }
 
-        // 80% threshold → notify /progress/complete API
+        // 80% threshold → mark complete SILENTLY (no popup here)
         if (!hasNotified80Ref.current && position / duration >= 0.8) {
             hasNotified80Ref.current = true;
             try {
                 const percentage = Math.round((position / duration) * 100);
                 await studentAPI.post('/progress/complete', {
-                    lectureId:  videoId,   // use lectureId (same as videoId here)
-                    courseId,
-                    percentage,
+                    lectureId: videoId, courseId, percentage,
                 });
-                setIsCompleted(true);
+                setIsCompleted(true); // ← sidebar checkmark updates instantly ✅
                 localStorage.removeItem(`vp_${videoId}`);
-                return 'completed'; // signal to show toast
+                return 'completed'; // signal to CourseContentPage (not for popup)
             } catch {
                 hasNotified80Ref.current = false;
             }
         }
         return null;
-    }, [videoId, courseId, studentId]);
+    }, [videoId, courseId]);
 
-    // ── 3. Start 10s interval ────────────────────────────────────────────────
-    const startTracking = useCallback((getVideoEl, onComplete) => {
+    // ── 3. Start 10s interval ─────────────────────────────────────────────────
+    const startTracking = useCallback((getVideoEl, onSilentComplete) => {
         if (intervalRef.current) clearInterval(intervalRef.current);
         intervalRef.current = setInterval(async () => {
             const video = getVideoEl();
             if (!video || video.paused) return;
             videoElRef.current = video;
             const result = await savePosition(video);
-            if (result === 'completed' && onComplete) onComplete();
+            // onSilentComplete is for sidebar update — NOT for popup
+            if (result === 'completed' && onSilentComplete) onSilentComplete();
         }, 10000);
     }, [savePosition]);
 
@@ -108,20 +110,19 @@ export default function useVideoProgress({ videoId, courseId, studentId }) {
                 navigator.sendBeacon(
                     `${base}/video/watch-position`,
                     new Blob(
-                        [JSON.stringify({ videoId, position: video.currentTime, duration: video.duration })],
+                        [JSON.stringify({ lectureId: videoId, position: video.currentTime, duration: video.duration })],
                         { type: 'application/json' }
                     )
                 );
-            } catch { /* localStorage already saved */ }
+            } catch { /* localStorage saved */ }
         };
         window.addEventListener('beforeunload', handleBeforeUnload);
         return () => window.removeEventListener('beforeunload', handleBeforeUnload);
     }, [videoId]);
 
-    useEffect(() => () => { if (intervalRef.current) clearInterval(intervalRef.current); }, []);
+    useEffect(() => () => {
+        if (intervalRef.current) clearInterval(intervalRef.current);
+    }, []);
 
-    return { lastPosition, isCompleted, loading, startTracking, stopTracking, savePosition };
+    return { lastPosition, isCompleted, loading, startTracking, stopTracking };
 }
-
-
-

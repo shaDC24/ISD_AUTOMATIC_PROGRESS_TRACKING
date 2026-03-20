@@ -100,3 +100,50 @@ SET completion_percentage = 0,
 WHERE student_id = 2;
 
 update seed.sql file
+
+
+
+git checkout -b shatabdi/ux-improvements
+git add frontend/src/hooks/useVideoProgress.js
+
+
+git add frontend/src/hooks/useVideoProgress.js
+git commit -m "fix(hooks): split 80% silent complete from 100% popup logic"
+
+
+git add frontend/src/pages/VideoPlayer.jsx
+git commit -m "feat(ui): add keyboard shortcuts Space/arrows/M/F to VideoPlayer"
+
+git add frontend/src/pages/VideoPlayer.jsx
+git commit -m "fix(ui): add keyboard shortcuts arrows for change volume to VideoPlayer"
+
+
+
+git add frontend/src/pages/VideoPlayer.jsx
+git commit -m "feat(ui): add 100% completion popup and buffering spinner"
+
+
+git add frontend/src/pages/VideoPlayer.jsx
+git commit -m "feat(ui): add volume slider + mute button"
+
+git add frontend/src/pages/VideoPlayer.jsx
+git commit -m "feat(ui): add 5s auto-advance countdown in 100% completion popup"
+
+git add frontend/src/pages/CourseContentPage.jsx
+git commit -m "feat(ui): pass onNextLecture to VideoPlayer for auto-advance"
+
+git push origin shatabdi/ux-improvements
+
+git add student-backend/src/controllers/courseController.js
+git commit -m "feat(course): include materials in GET /courses/:courseId/lectures response"
+
+
+git add frontend/src/components/CircularProgress.jsx
+git commit -m "feat(ui): add CircularProgress component for per-lecture watch progress"
+
+
+git add frontend/src/pages/CourseContentPage.jsx
+git commit -m "feat(ui): show materials in sidebar + circular progress per lecture"
+
+git add frontend/src/pages/CourseContentPage.jsx
+git commit -m "feat(ui): making ui for showing materials in sidebar"
