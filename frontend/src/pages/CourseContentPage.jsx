@@ -12,6 +12,7 @@ import { useState, useEffect, useCallback } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import VideoPlayer from './VideoPlayer';
 import studentAPI from '../services/api';
+import CircularProgress from '../components/CircularProgress';
 
 export default function CourseContentPage() {
     const { courseId } = useParams();
@@ -20,6 +21,8 @@ export default function CourseContentPage() {
     const [lectures,        setLectures]        = useState([]);
     const [selectedIdx,     setSelectedIdx]      = useState(0);
     const [completedIds,    setCompletedIds]     = useState(new Set());
+    const [materials,       setMaterials]        = useState([]);
+    const [lectureProgress, setLectureProgress]  = useState({}); // {lectureId: percent}
     const [courseProgress,  setCourseProgress]   = useState(0);
     const [loading,         setLoading]          = useState(true);
 
@@ -37,9 +40,22 @@ export default function CourseContentPage() {
             try {
                 const res = await studentAPI.get(`/courses/${courseId}/lectures`);
                 setLectures(res.data.lectures || []);
+                setMaterials(res.data.materials || []);                
             } catch (err) {
                 console.error('Could not load lectures:', err.message);
             }
+            // Load per-lecture progress (completion %)
+            try {
+                const progRes = await studentAPI.get(`/progress/lectures/${courseId}`);
+                const progMap = {};
+                (progRes.data.lectures || []).forEach(l => {
+                    progMap[l.lecture_id] = {
+                        percent:     l.completion_percent || 0,
+                        is_completed: l.is_completed || false,
+                    };
+                });
+                setLectureProgress(progMap);
+            } catch { /* Arpita's API — ok if not ready */ }            
 
             try {
                 const progressRes = await studentAPI.get(`/progress/lectures/${courseId}`);
@@ -130,25 +146,57 @@ export default function CourseContentPage() {
                     {lectures.map((lecture, idx) => {
                         const isDone     = completedIds.has(lecture.id);
                         const isSelected = idx === selectedIdx;
+                        const prog       = lectureProgress[lecture.id];
+                        const percent    = prog?.percent || 0;
+                        const sectionMaterials = materials.filter(m => m.section_id === lecture.section_id);
+
                         return (
-                            <div
-                                key={lecture.id}
-                                onClick={() => { cancelCountdown(); setSelectedIdx(idx); }}
-                                style={{
-                                    ...styles.lectureItem,
-                                    ...(isSelected ? styles.lectureItemActive : {}),
-                                }}
-                            >
-                                <span style={isDone ? styles.checkDone : styles.checkEmpty}>
-                                    {isDone ? '✓' : idx + 1}
-                                </span>
-                                <div style={{ flex: 1 }}>
-                                    <p style={styles.lectureName}>{lecture.title}</p>
-                                    <p style={styles.lectureMeta}>
-                                        {Math.floor((lecture.duration || 0) / 60)}m
-                                        {isDone ? ' · Done' : ''}
-                                    </p>
+                            <div key={lecture.id}>
+                                {/* Lecture row */}
+                                <div
+                                    onClick={() => { cancelCountdown(); setSelectedIdx(idx); }}
+                                    style={{
+                                        ...styles.lectureItem,
+                                        ...(isSelected ? styles.lectureItemActive : {}),
+                                    }}
+                                >
+                                    {/* Circular progress */}
+                                    <CircularProgress
+                                        percent={percent}
+                                        isCompleted={isDone}
+                                        size={28}
+                                    />
+                                    <div style={{ flex: 1 }}>
+                                        <p style={styles.lectureName}>{lecture.title}</p>
+                                        <p style={styles.lectureMeta}>
+                                            {Math.floor((lecture.duration || 0) / 60)}m
+                                            {isDone ? ' · ✓ Completed' : percent > 0 ? ` · ${Math.round(percent)}% watched` : ''}
+                                        </p>
+                                    </div>
                                 </div>
+
+                                {/* Materials for this section (show under lectures in same section) */}
+                                {isSelected && sectionMaterials.length > 0 && (
+                                    <div style={styles.materialsBox}>
+                                        <p style={styles.materialsTitle}>📎 Materials</p>
+                                        {sectionMaterials.map(mat => (
+                                            <a
+                                                key={mat.id}
+                                                href={mat.file_url}
+                                                target="_blank"
+                                                rel="noreferrer"
+                                                style={styles.materialLink}
+                                                download={mat.download_allowed}
+                                            >
+                                                {mat.file_type === 'pdf' ? '📄' :
+                                                 mat.file_type === 'zip' ? '📦' :
+                                                 mat.file_type === 'ppt' || mat.file_type === 'pptx' ? '📊' : '📁'}
+                                                {' '}{mat.title}
+                                                {mat.download_allowed && ' ↓'}
+                                            </a>
+                                        ))}
+                                    </div>
+                                )}
                             </div>
                         );
                     })}
@@ -183,7 +231,8 @@ export default function CourseContentPage() {
                                 selectedIdx < lectures.length - 1
                                     ? () => { cancelCountdown(); setSelectedIdx(i => i + 1); }
                                     : null
-                            }/>
+                            }
+                        />
 
                         {/* Auto-advance banner */}
                         {countdown !== null && (
