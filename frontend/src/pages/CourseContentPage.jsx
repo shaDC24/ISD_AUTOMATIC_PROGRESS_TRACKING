@@ -179,7 +179,11 @@ export default function CourseContentPage() {
                             courseIdProp={courseId}
                             studentIdProp={studentId}
                             onComplete={() => handleLectureComplete(selectedLecture.id)}
-                        />
+                            onNextLecture={
+                                selectedIdx < lectures.length - 1
+                                    ? () => { cancelCountdown(); setSelectedIdx(i => i + 1); }
+                                    : null
+                            }/>
 
                         {/* Auto-advance banner */}
                         {countdown !== null && (
