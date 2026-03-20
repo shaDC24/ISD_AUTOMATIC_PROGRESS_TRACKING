@@ -141,66 +141,112 @@ export default function CourseContentPage() {
                     <h3 style={styles.sidebarTitle}>Course Content</h3>
                 </div>
 
-                {/* Lecture list */}
+                {/* Lecture list — Section grouped like Udemy */}
                 <div style={styles.lectureList}>
-                    {lectures.map((lecture, idx) => {
-                        const isDone     = completedIds.has(lecture.id);
-                        const isSelected = idx === selectedIdx;
-                        const prog       = lectureProgress[lecture.id];
-                        const percent    = prog?.percent || 0;
-                        const sectionMaterials = materials.filter(m => m.section_id === lecture.section_id);
+                    {(() => {
+                        // Group lectures by section
+                        const sections = {};
+                        lectures.forEach((lecture, idx) => {
+                            const key = lecture.section_id;
+                            if (!sections[key]) {
+                                sections[key] = {
+                                    title:    lecture.section_title,
+                                    position: lecture.section_position,
+                                    lectures: [],
+                                };
+                            }
+                            sections[key].lectures.push({ ...lecture, globalIdx: idx });
+                        });
 
-                        return (
-                            <div key={lecture.id}>
-                                {/* Lecture row */}
-                                <div
-                                    onClick={() => { cancelCountdown(); setSelectedIdx(idx); }}
-                                    style={{
-                                        ...styles.lectureItem,
-                                        ...(isSelected ? styles.lectureItemActive : {}),
-                                    }}
-                                >
-                                    {/* Circular progress */}
-                                    <CircularProgress
-                                        percent={percent}
-                                        isCompleted={isDone}
-                                        size={28}
-                                    />
-                                    <div style={{ flex: 1 }}>
-                                        <p style={styles.lectureName}>{lecture.title}</p>
-                                        <p style={styles.lectureMeta}>
-                                            {Math.floor((lecture.duration || 0) / 60)}m
-                                            {isDone ? ' · ✓ Completed' : percent > 0 ? ` · ${Math.round(percent)}% watched` : ''}
-                                        </p>
+                        return Object.values(sections)
+                            .sort((a, b) => a.position - b.position)
+                            .map(section => (
+                                <div key={section.title}>
+                                    {/* Section header */}
+                                    <div style={styles.sectionHeader}>
+                                        <span style={styles.sectionIcon}>📂</span>
+                                        <span style={styles.sectionTitle}>{section.title}</span>
+                                        <span style={styles.sectionCount}>
+                                            {section.lectures.length} lectures
+                                        </span>
                                     </div>
+
+                                    {/* Lectures under this section */}
+                                    {section.lectures.map(lecture => {
+                                        const isDone     = completedIds.has(lecture.id);
+                                        const isSelected = lecture.globalIdx === selectedIdx;
+                                        const prog       = lectureProgress[lecture.id];
+                                        const percent    = prog?.percent || 0;
+                                        const mins       = Math.floor((lecture.duration || 0) / 60);
+                                        const secs       = Math.floor((lecture.duration || 0) % 60);
+                                        const durationStr = mins > 0
+                                            ? `${mins}m ${secs > 0 ? secs + 's' : ''}`
+                                            : `${secs}s`;
+
+                                        // Materials for this section
+                                        const sectionMats = materials.filter(
+                                            m => m.section_id === lecture.section_id
+                                        );
+
+                                        return (
+                                            <div key={lecture.id}>
+                                                {/* Lecture row */}
+                                                <div
+                                                    onClick={() => { cancelCountdown(); setSelectedIdx(lecture.globalIdx); }}
+                                                    style={{
+                                                        ...styles.lectureItem,
+                                                        ...(isSelected ? styles.lectureItemActive : {}),
+                                                    }}
+                                                >
+                                                    <CircularProgress
+                                                        percent={percent}
+                                                        isCompleted={isDone}
+                                                        size={26}
+                                                    />
+                                                    <div style={{ flex: 1, minWidth: 0 }}>
+                                                        <p style={styles.lectureName}>{lecture.title}</p>
+                                                        <p style={styles.lectureMeta}>
+                                                            🕐 {durationStr}
+                                                            {isDone && ' · ✓ Completed'}
+                                                            {!isDone && percent > 0 && ` · ${Math.round(percent)}% watched`}
+                                                        </p>
+                                                    </div>
+                                                </div>
+
+                                                {/* Materials — show only under selected lecture */}
+                                                {isSelected && sectionMats.length > 0 && (
+                                                    <div style={styles.materialsBox}>
+                                                        <p style={styles.materialsTitle}>📎 Section Materials</p>
+                                                        {sectionMats.map(mat => (
+                                                            <a
+                                                                key={mat.id}
+                                                                href={mat.file_url}
+                                                                target="_blank"
+                                                                rel="noreferrer"
+                                                                style={styles.materialLink}
+                                                                download={mat.download_allowed}
+                                                            >
+                                                                <span style={styles.materialIcon}>
+                                                                    {mat.file_type === 'pdf'  ? '📄' :
+                                                                     mat.file_type === 'zip'  ? '📦' :
+                                                                     mat.file_type === 'ppt' || mat.file_type === 'pptx' ? '📊' : '📁'}
+                                                                </span>
+                                                                <span style={styles.materialName}>{mat.title}</span>
+                                                                {mat.download_allowed && (
+                                                                    <span style={styles.downloadBadge}>↓ Download</span>
+                                                                )}
+                                                            </a>
+                                                        ))}
+                                                    </div>
+                                                )}
+                                            </div>
+                                        );
+                                    })}
                                 </div>
-
-                                {/* Materials for this section (show under lectures in same section) */}
-                                {isSelected && sectionMaterials.length > 0 && (
-                                    <div style={styles.materialsBox}>
-                                        <p style={styles.materialsTitle}> Materials</p>
-                                        {sectionMaterials.map(mat => (
-                                            <a
-                                                key={mat.id}
-                                                href={mat.file_url}
-                                                target="_blank"
-                                                rel="noreferrer"
-                                                style={styles.materialLink}
-                                                download={mat.download_allowed}
-                                            >
-                                                {mat.file_type === 'pdf' ? '📄' :
-                                                 mat.file_type === 'zip' ? '📦' :
-                                                 mat.file_type === 'ppt' || mat.file_type === 'pptx' ? '📊' : '📁'}
-                                                {' '}{mat.title}
-                                                {mat.download_allowed && ' ↓'}
-                                            </a>
-                                        ))}
-                                    </div>
-                                )}
-                            </div>
-                        );
-                    })}
+                            ));
+                    })()}
                 </div>
+
 
                 {/* Course progress bar */}
                 <div style={styles.progressBox}>
@@ -447,7 +493,10 @@ const styles = {
         borderRadius:'50%',
         animation:   'spin 0.8s linear infinite',
     },
-
+    sectionTitle: {
+        color: '#f3f4f6',
+        fontSize: '14px',
+    },
     materialsTitle: {
         color: '#9ca3af',
         fontSize: '11px',
