@@ -13,10 +13,9 @@ app.use(express.json());
 const authRoutes = require('./routes/auth.routes');
 app.use('/api/auth', authRoutes);
 
-// Temporarily commented — Issue #1: getLessonsProgress typo in progress_router.js
-// Will uncomment after Arpita fixes the bug
-// const progressRoutes = require('./routes/progress_router');
-// app.use('/api/progress', progressRoutes);
+
+ const progressRoutes = require('./routes/progress_router');
+ app.use('/api/progress', progressRoutes);
 
 //uploading videos and files
 const uploadRoutes = require('./routes/upload.routes');
@@ -29,6 +28,7 @@ app.use('/api/video', videoRoutes);
 // Course content routes
 const courseRoutes = require('./routes/course.routes');
 app.use('/api/courses', courseRoutes);
+
 
 
 // Health check
