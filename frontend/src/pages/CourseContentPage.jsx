@@ -387,11 +387,11 @@ const styles = {
         borderBottom: '1px solid #1e293b',
         transition:   'background 0.15s',
         backgroundColor: '#1a1f2e',
+        boxShadow:    'inset 0 0 0 0 #7c3aed',
     },
     lectureItemActive: {
         backgroundColor: '#1e1b4b',
-        borderLeft:      '3px solid #7c3aed',
-        paddingLeft:     'calc(1.8rem - 3px)',
+        boxShadow:       'inset 3px 0 0 0 #7c3aed',
     },
     checkDone: {
         width:           '22px',
