@@ -116,6 +116,7 @@ export default function VideoPlayer({ videoIdProp, courseIdProp, studentIdProp, 
                     ref={videoRef}
                     src={videoData?.url}
                     style={styles.video}
+                    crossOrigin="anonymous"
                     onLoadedMetadata={handleLoadedMetadata}
                     onTimeUpdate={handleTimeUpdate}
                     onPlay={handlePlay}
