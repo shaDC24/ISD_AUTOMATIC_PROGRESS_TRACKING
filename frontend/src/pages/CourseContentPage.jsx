@@ -177,8 +177,8 @@ export default function CourseContentPage() {
                                         const sectionId  = section.lectures[0]?.section_id;
                                         const isOpen     = openSections[sectionId] !== false;
                                         const doneCount  = section.lectures.filter(l => completedIds.has(l.id)).length;
-                                        const totalMins  = Math.floor(
-                                            section.lectures.reduce((s, l) => s + (l.duration || 0), 0) / 60
+                                        const totalMins  =  Math.floor(
+                                            section.lectures.reduce((s, l) => s + (parseFloat(l.duration) || 0), 0) / 60
                                         );
                                         return (
                                             <div
@@ -206,8 +206,8 @@ export default function CourseContentPage() {
                                         const isSelected = lecture.globalIdx === selectedIdx;
                                         const prog       = lectureProgress[lecture.id];
                                         const percent    = prog?.percent || 0;
-                                        const mins       = Math.floor((lecture.duration || 0) / 60);
-                                        const secs       = Math.floor((lecture.duration || 0) % 60);
+                                        const mins       = Math.floor((parseFloat(lecture.duration) || 0) / 60);
+                                        const secs       = Math.floor((parseFloat(lecture.duration) || 0) % 60);
                                         const durationStr = mins > 0
                                             ? `${mins}m ${secs > 0 ? secs + 's' : ''}`
                                             : `${secs}s`;
@@ -245,7 +245,7 @@ export default function CourseContentPage() {
                                                 {/* Materials — show only under selected lecture */}
                                                 {isSelected && sectionMats.length > 0 && (
                                                     <div style={styles.materialsBox}>
-                                                        <p style={styles.materialsTitle}>📎 Section Materials</p>
+                                                        <p style={styles.materialsTitle}> Section Materials</p>
                                                         {sectionMats.map(mat => (
                                                             <a
                                                                 key={mat.id}
