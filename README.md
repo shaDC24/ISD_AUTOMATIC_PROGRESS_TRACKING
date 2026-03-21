@@ -41,16 +41,25 @@ ISD_AUTOMATIC_PROGRESS_TRACKING/
 │   ├── package-lock.json
 │   ├── .gitignore
 │   └── src/
-│       ├── App.jsx                        (Tanmi + Shatabdi adds routes)
+│       ├── App.jsx                        (Tanmi + Shatabdi + arpita adds routes)
 │       ├── main.jsx
-│       ├── pages/
-│       │   ├── Login.jsx                  (Tanmi)
+│       ├── ├── pages/
+│       │   ├── Login.jsx                  (Tanmi → Arpita redesigned)
 │       │   ├── Register.jsx               (Tanmi)
+│       │   ├── StudentDashboard.jsx       (Arpita)
+│       │   ├── MyLearning.jsx             (Arpita)
 │       │   ├── VideoPlayer.jsx            (Shatabdi)
 │       │   └── CourseContentPage.jsx      (Shatabdi)
 │       ├── components/
+│       │   ├── Navbar.jsx                 (Arpita)
+│       │   ├── CourseNavbar.jsx           (Arpita)
+│       │   ├── CourseMilestones.jsx       (Arpita)
+│       │   ├── LearningStreak.jsx         (Arpita)
+│       │   ├── WeeklyProgress.jsx         (Arpita)
+│       │   ├── Footer1.jsx               (Arpita)
+│       │   ├── Footer2.jsx               (Arpita)
 │       │   ├── ProgressBar.jsx            (Shatabdi)
-│       │   └── CircularProgress.jsx       (Shatabdi)
+│       │   └── CircularProgress.jsx       (Arpita)
 │       ├── hooks/
 │       │   └── useVideoProgress.js        (Shatabdi)
 │       └── services/
@@ -206,6 +215,11 @@ All seed users have password: `password123`
 | POST   | `/upload/video`              | Upload video to Cloudinary | Shatabdi |
 | POST   | `/upload/material`           | Upload PDF/ZIP/PPT to Cloudinary | Shatabdi |
 | DELETE | `/upload/video/:lectureId`   | Delete from Cloudinary + DB | Shatabdi |
+| GET | `/progress/enrolled/courses` | All enrolled courses with progress | Arpita |
+| GET | `/progress/weekly/stats` | Weekly completion stats (last 7 days) | Arpita |
+| GET | `/progress/lectures/:courseId` | Per-lecture completion status | Arpita |
+| GET | `/progress/:courseId` | Course overall progress % | Arpita |
+| POST | `/progress/complete` | Mark lecture complete + update course % | Arpita |
 
 ---
 
@@ -332,7 +346,7 @@ Each member works on their own branch and opens a PR to `main`.
 |----------|----------|---------|-------------|
 | Tanmi    | Login.jsx, Register.jsx, App.jsx, api.js | index.js, db.js, authController.js, auth.routes.js | student-schema.sql, seed.sql, .env.example |
 | Shatabdi | VideoPlayer.jsx, CourseContentPage.jsx, ProgressBar.jsx, CircularProgress.jsx, useVideoProgress.js | auth.middleware.js, videoController.js, courseController.js, uploadController.js, upload.middleware.js, cloudinary.js, video/course/upload routes | subtitle_url + reviews in schema, Cloudinary URLs in seed.sql |
-| Arpita   | — | progressController.js, progress_router.js | — |
+|Arpita   | StudentDashboard.jsx, MyLearning.jsx, Login.jsx (redesign), Navbar.jsx, CourseNavbar.jsx, CourseMilestones.jsx, LearningStreak.jsx, WeeklyProgress.jsx, Footer1.jsx, Footer2.jsx, api.js (added) | progressController.js, progress_router.js | — |
 | Shadman  | — | — | — |
 | Niaz     | — | — | — |
 | Tamanna  | — | — | — |
