@@ -85,6 +85,7 @@ const getEnrolledCourses = async(req,res)=>{
              e.course_id = cp.course_id WHERE e.student_id = $1`,
             [userId]
         );
+        console.log('Enrolled courses:', result.rows.length, result.rows);
         res.json(result.rows);
     } catch (error) {
         console.error('Error fetching enrolled courses:', error);
@@ -92,4 +93,4 @@ const getEnrolledCourses = async(req,res)=>{
     }
 };
 
-module.exports = { getCourseProgress, getLessonProgress, MarkLessonComplete, getEnrolledCoures };
+module.exports = { getCourseProgress, getLessonProgress, MarkLessonComplete, getEnrolledCourses };

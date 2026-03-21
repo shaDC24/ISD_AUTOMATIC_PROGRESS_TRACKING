@@ -1,11 +1,14 @@
 const express = require('express');
 const router = express.Router();
-
+const verifyToken = require('../middleware/auth.middleware');
 const progressController = require('../controllers/progressController'); 
 
+router.use(verifyToken);
+
 router.get('/enrolled/courses', progressController.getEnrolledCourses);
-router.get('/:courseId',progressController.getCourseProgress);
 router.get('/lessons/:courseId',progressController.getLessonProgress);
+router.get('/:courseId',progressController.getCourseProgress);
+
 router.post('/complete',progressController.MarkLessonComplete);
 
 

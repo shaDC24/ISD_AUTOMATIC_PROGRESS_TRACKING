@@ -3,6 +3,7 @@ import Login from './pages/Login';
 import Register from './pages/Register';
 
 import CourseContentPage from './pages/CourseContentPage';
+import StudentDashboard from './pages/StudentDashboard';
 
 function App() {
     return (
@@ -12,6 +13,8 @@ function App() {
                 <Route path="/login" element={<Login />} />
                 <Route path="/register" element={<Register />} />
                 <Route path="/student/course/:courseId" element={<CourseContentPage />} />
+                <Route path="/student/dashboard" element={<StudentDashboard />} />
+                
             </Routes>
         </BrowserRouter>
     );
