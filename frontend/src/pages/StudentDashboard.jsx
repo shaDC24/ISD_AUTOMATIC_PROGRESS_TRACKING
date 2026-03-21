@@ -25,7 +25,6 @@ export default function StudentDashboard() {
 
     const completedCount = courses.filter(c => parseFloat(c.completion_percentage) >= 100).length;
     const inProgressCount = courses.filter(c => parseFloat(c.completion_percentage) > 0 && parseFloat(c.completion_percentage) < 100).length;
-    const notStartedCount = courses.filter(c => parseFloat(c.completion_percentage) === 0).length;
     const avgProgress = courses.length > 0
         ? (courses.reduce((sum, c) => sum + parseFloat(c.completion_percentage || 0), 0) / courses.length).toFixed(1)
         : 0;
@@ -37,125 +36,223 @@ export default function StudentDashboard() {
         }, courses[0])
         : null;
 
+    const initials = user?.name
+        ? user.name.split(' ').map(w => w[0]).join('').toUpperCase().slice(0, 2)
+        : '?';
+
     if (loading) {
         return (
-            <div>
+            <div style={{ backgroundColor: '#f8f9fa', minHeight: '100vh' }}>
                 <Navbar />
-                <div style={styles.loadingContainer}>
-                    <p style={styles.loadingText}>Loading your courses...</p>
+                <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '50vh' }}>
+                    <p style={{ color: '#6b7280', fontSize: '15px' }}>Loading...</p>
                 </div>
             </div>
         );
     }
 
     return (
-        <div style={styles.page}>
+        <div style={{ minHeight: '100vh', backgroundColor: '#f8f9fa' }}>
             <Navbar />
 
-            <div style={styles.container}>
+            <div style={{ maxWidth: '1200px', margin: '0 auto', padding: '28px 48px' }}>
+
                 {/* Welcome */}
-                <div style={styles.welcomeCard}>
-                    <h1 style={styles.welcomeTitle}>Welcome back, {user?.name?.split(' ')[1] || user?.name}!</h1>
-                    <p style={styles.welcomeSubtitle}>Continue where you left off</p>
+                <div style={{
+                    display: 'flex', alignItems: 'center', gap: '14px',
+                    marginBottom: '28px',
+                }}>
+                    <div style={{
+                        width: '52px', height: '52px', borderRadius: '50%',
+                        backgroundColor: '#1c1d1f', display: 'flex',
+                        alignItems: 'center', justifyContent: 'center',
+                        color: '#fff', fontSize: '20px', fontWeight: 700,
+                    }}>{initials}</div>
+                    <h1 style={{
+                        fontSize: '28px', fontWeight: 700, color: '#1c1d1f', margin: 0,
+                    }}>Welcome Back, {user?.name?.split(' ').pop() || user?.name}</h1>
+                </div>
+
+                {/* Hero Banner */}
+                <div style={{
+                    backgroundImage: 'url(https://t3.ftcdn.net/jpg/06/36/82/78/360_F_636827881_ttVgOQbowRIKW4gaeQHnEjNM45eLeY5v.jpg)',
+                    backgroundSize: 'cover',
+                    backgroundPosition: 'center',
+                    borderRadius: '12px', marginBottom: '36px',
+                    position: 'relative', overflow: 'hidden', height: '500px',
+                    display: 'flex', alignItems: 'center',
+                }}>
+                    {/* Text Card */}
+                    <div style={{
+                        backgroundColor: 'rgba(28,29,31,0.88)', borderRadius: '8px',
+                        padding: '32px 36px', marginLeft: '48px', maxWidth: '380px',
+                        position: 'relative', zIndex: 1,
+                    }}>
+                        <h2 style={{
+                            fontSize: '28px', fontWeight: 700, color: '#fff',
+                            margin: '0 0 12px', lineHeight: '1.2',
+                        }}>Move forward on your goals</h2>
+                        <p style={{
+                            fontSize: '14px', color: 'rgba(255,255,255,0.75)',
+                            margin: '0 0 20px', lineHeight: '1.6',
+                        }}>
+                            Track your progress across all courses. Complete lectures to unlock milestones.
+                        </p>
+                        {lastAccessed && (
+                            <button
+                                onClick={() => navigate(`/student/course/${lastAccessed.id}`)}
+                                style={{
+                                    padding: '12px 24px', backgroundColor: '#fff',
+                                    color: '#1c1d1f', border: 'none', fontSize: '15px',
+                                    fontWeight: 700, cursor: 'pointer', borderRadius: '4px',
+                                }}
+                            >
+                                Continue learning
+                            </button>
+                        )}
+                    </div>
                 </div>
 
                 {/* Stats */}
-                <div style={styles.statsGrid}>
-                    <div style={styles.statCard}>
-                        <p style={styles.statLabel}>Enrolled</p>
-                        <p style={styles.statNumber}>{courses.length}</p>
-                    </div>
-                    <div style={styles.statCard}>
-                        <p style={styles.statLabel}>Completed</p>
-                        <p style={styles.statNumber}>{completedCount}</p>
-                    </div>
-                    <div style={styles.statCard}>
-                        <p style={styles.statLabel}>In progress</p>
-                        <p style={styles.statNumber}>{inProgressCount}</p>
-                    </div>
-                    <div style={styles.statCard}>
-                        <p style={styles.statLabel}>Avg progress</p>
-                        <p style={styles.statNumber}>{avgProgress}%</p>
-                    </div>
+                <div style={{
+                    display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)',
+                    gap: '16px', marginBottom: '40px',
+                }}>
+                    {[
+                        { label: 'ENROLLED COURSES', value: courses.length, icon: '📚', accent: '#020202' },
+                        { label: 'COMPLETED', value: completedCount, icon: '✅', accent: '#107008' },
+                        { label: 'IN PROGRESS', value: inProgressCount, icon: '📖', accent: '#11968f' },
+                        { label: 'AVERAGE PROGRESS', value: `${avgProgress}%`, icon: '📊', accent: '#162be2' },
+                    ].map((stat, i) => (
+                        <div key={i} style={{
+                            padding: '24px', borderRadius: '12px',
+                            backgroundColor: '#ded2e4', border: '1.5px solid #91209b',
+                            transition: 'transform 0.15s, box-shadow 0.15s',
+                            cursor: 'default',
+                        }}
+                            onMouseEnter={e => { e.currentTarget.style.transform = 'translateY(-2px)'; e.currentTarget.style.boxShadow = '0 8px 20px rgba(0,0,0,0.06)'; }}
+                            onMouseLeave={e => { e.currentTarget.style.transform = ''; e.currentTarget.style.boxShadow = ''; }}
+                        >
+                            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '12px' }}>
+                                <p style={{
+                                    fontSize: '11px', color: '#6b7280', margin: 0,
+                                    fontWeight: 700, letterSpacing: '0.8px',
+                                }}>{stat.label}</p>
+                                <span style={{ fontSize: '20px' }}>{stat.icon}</span>
+                            </div>
+                            <p style={{
+                                fontSize: '36px', fontWeight: 700, color: stat.accent, margin: 0,
+                            }}>{stat.value}</p>
+                        </div>
+                    ))}
                 </div>
 
-                {/* Continue Learning Banner */}
-                {lastAccessed && (
-                    <div style={styles.continueBanner}>
-                        <div style={styles.continueThumb}>
-                            {lastAccessed.title.substring(0, 2).toUpperCase()}
-                        </div>
-                        <div style={styles.continueInfo}>
-                            <p style={styles.continueLabel}>CONTINUE LEARNING</p>
-                            <p style={styles.continueTitle}>{lastAccessed.title}</p>
-                            <p style={styles.continueSubtitle}>
-                                {lastAccessed.completed_lectures}/{lastAccessed.total_lectures} lectures completed
-                            </p>
-                            <div style={styles.miniProgressTrack}>
-                                <div style={{
-                                    ...styles.miniProgressFill,
-                                    width: `${parseFloat(lastAccessed.completion_percentage)}%`
-                                }} />
-                            </div>
-                        </div>
-                        <button
-                            style={styles.resumeBtn}
-                            onClick={() => navigate(`/student/course/${lastAccessed.id}`)}
-                        >
-                            Resume
-                        </button>
-                    </div>
-                )}
+                {/* Let's start learning */}
+                <h2 style={{
+                    fontSize: '24px', fontWeight: 700, color: '#1c1d1f',
+                    margin: '0 0 4px',
+                }}>Let's start learning</h2>
+                <p style={{
+                    fontSize: '14px', color: '#6b7280', margin: '0 0 22px',
+                }}>Your enrolled courses with progress tracking</p>
 
-                {/* My Courses */}
-                <h2 style={styles.sectionTitle}>My courses</h2>
-                <div style={styles.coursesGrid}>
+                {/* Course Cards */}
+                <div style={{
+                    display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)',
+                    gap: '20px', marginBottom: '48px',
+                }}>
                     {courses.map(course => {
                         const percent = parseFloat(course.completion_percentage || 0);
                         const isStarted = percent > 0;
+                        const isComplete = percent >= 100;
 
                         return (
                             <div
                                 key={course.id}
-                                style={styles.courseCard}
+                                style={{
+                                    border: '1px solid #e5e7eb', overflow: 'hidden',
+                                    borderRadius: '12px', backgroundColor: '#fff',
+                                    cursor: 'pointer', transition: 'transform 0.2s, box-shadow 0.2s',
+                                }}
                                 onClick={() => navigate(`/student/course/${course.id}`)}
+                                onMouseEnter={e => { e.currentTarget.style.transform = 'translateY(-4px)'; e.currentTarget.style.boxShadow = '0 12px 28px rgba(0,0,0,0.1)'; }}
+                                onMouseLeave={e => { e.currentTarget.style.transform = ''; e.currentTarget.style.boxShadow = ''; }}
                             >
-                                <div style={styles.courseThumbnail}>
-                                    <span style={styles.thumbText}>{course.title.split(':')[0]}</span>
-                                    <div style={styles.thumbProgress}>
+                                <div style={{
+                                    height: '140px',
+                                    background: 'linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%)',
+                                    display: 'flex', alignItems: 'center', justifyContent: 'center',
+                                    position: 'relative',
+                                }}>
+                                    <span style={{
+                                        color: '#fff', fontSize: '16px', fontWeight: 600,
+                                        textAlign: 'center', padding: '0 28px',
+                                    }}>{course.title}</span>
+                                    <div style={{
+                                        position: 'absolute', bottom: 0, left: 0, right: 0,
+                                        height: '4px', backgroundColor: 'rgba(255,255,255,0.1)',
+                                    }}>
                                         <div style={{
-                                            ...styles.thumbProgressFill,
-                                            width: `${percent}%`
+                                            height: '100%', width: `${percent}%`,
+                                            backgroundColor: isComplete ? '#34d399' : '#a435f0',
+                                            transition: 'width 0.4s',
                                         }} />
                                     </div>
                                 </div>
 
-                                <div style={styles.courseBody}>
-                                    <p style={styles.courseTitle}>{course.title}</p>
-                                    <p style={styles.courseInstructor}>Instructor</p>
+                                <div style={{ padding: '18px 22px' }}>
+                                    <p style={{
+                                        fontSize: '17px', fontWeight: 700, color: '#1c1d1f',
+                                        margin: '0 0 4px',
+                                    }}>{course.title}</p>
+                                    <p style={{
+                                        fontSize: '13px', color: '#6b7280', margin: '0 0 16px',
+                                    }}>Instructor Karim</p>
 
-                                    <div style={styles.progressTrack}>
+                                    <div style={{
+                                        height: '8px', backgroundColor: '#e5e7eb',
+                                        overflow: 'hidden', marginBottom: '8px',
+                                        borderRadius: '4px',
+                                    }}>
                                         <div style={{
-                                            ...styles.progressFill,
-                                            width: `${percent}%`,
-                                            backgroundColor: percent >= 100 ? '#10b981' : '#7c3aed',
+                                            height: '100%', width: `${percent}%`,
+                                            backgroundColor: isComplete ? '#34d399' : '#a435f0',
+                                            transition: 'width 0.4s', borderRadius: '4px',
                                         }} />
                                     </div>
 
-                                    <div style={styles.progressInfo}>
-                                        <span style={styles.lectureCount}>
-                                            {course.completed_lectures}/{course.total_lectures} lectures
+                                    <div style={{
+                                        display: 'flex', justifyContent: 'space-between',
+                                        marginBottom: '16px',
+                                    }}>
+                                        <span style={{ fontSize: '13px', color: '#6b7280' }}>
+                                            {course.completed_lectures} of {course.total_lectures} lectures
                                         </span>
                                         <span style={{
-                                            ...styles.percentText,
-                                            color: percent >= 100 ? '#10b981' : percent > 0 ? '#7c3aed' : '#9ca3af',
+                                            fontSize: '14px', fontWeight: 700,
+                                            color: isComplete ? '#059669' : percent > 0 ? '#a435f0' : '#9ca3af',
                                         }}>
-                                            {percent.toFixed(0)}%
+                                            {percent.toFixed(0)}% complete
                                         </span>
                                     </div>
 
-                                    <button style={isStarted ? styles.continueBtn : styles.startBtn}>
-                                        {isStarted ? 'Continue learning' : 'Start course'}
+                                    <button style={{
+                                        width: '100%', padding: '12px',
+                                        fontSize: '14px', fontWeight: 700, cursor: 'pointer',
+                                        borderRadius: '8px',
+                                        ...(isComplete ? {
+                                            backgroundColor: '#ecfdf5', color: '#059669', border: '1px solid #a7f3d0',
+                                        } : isStarted ? {
+                                            backgroundColor: '#a435f0', color: '#fff', border: 'none',
+                                        } : {
+                                            backgroundColor: '#fff', color: '#1c1d1f',
+                                            border: '2px solid #1c1d1f',
+                                        }),
+                                    }}
+                                        onMouseEnter={e => e.currentTarget.style.opacity = '0.85'}
+                                        onMouseLeave={e => e.currentTarget.style.opacity = '1'}
+                                    >
+                                        {isComplete ? 'Completed' : isStarted ? 'Continue learning' : 'Start course'}
                                     </button>
                                 </div>
                             </div>
@@ -164,313 +261,105 @@ export default function StudentDashboard() {
                 </div>
 
                 {/* Milestones */}
-                <h2 style={styles.sectionTitle}>Milestones</h2>
-                <div style={styles.milestonesGrid}>
-                    {[
-                        { pct: 25, label: 'Getting started', color: '#7c3aed', bg: '#f3f0ff' },
-                        { pct: 50, label: 'Halfway there', color: '#2563eb', bg: '#eff6ff' },
-                        { pct: 75, label: 'Almost done', color: '#d97706', bg: '#fffbeb' },
-                        { pct: 100, label: 'Course master', color: '#10b981', bg: '#ecfdf5' },
-                    ].map(m => {
-                        const achieved = courses.some(c => parseFloat(c.completion_percentage) >= m.pct);
-                        return (
-                            <div key={m.pct} style={{
-                                ...styles.milestoneCard,
-                                backgroundColor: achieved ? m.bg : '#f5f5f5',
-                                opacity: achieved ? 1 : 0.4,
-                            }}>
-                                <p style={{
-                                    ...styles.milestonePct,
-                                    color: achieved ? m.color : '#999',
-                                }}>{m.pct}%</p>
-                                <p style={{
-                                    ...styles.milestoneLabel,
-                                    color: achieved ? m.color : '#999',
-                                }}>{m.label}</p>
-                                <p style={styles.milestoneStatus}>
-                                    {achieved ? '✓ Unlocked' : 'Locked'}
-                                </p>
-                            </div>
-                        );
-                    })}
+               {/* Milestones */}
+<h2 style={{
+    fontSize: '24px', fontWeight: 700, color: '#1c1d1f',
+    margin: '0 0 4px',
+}}>Your milestones</h2>
+<p style={{
+    fontSize: '14px', color: '#6b7280', margin: '0 0 22px',
+}}>Complete courses to unlock achievements</p>
+
+<div style={{
+    display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)',
+    gap: '16px', marginBottom: '48px',
+}}>
+    {[
+        { pct: 25, label: 'Getting started', icon: '🚀', lockedIcon: '🎯', color: '#a435f0', lightColor: '#f3e8ff', midColor: '#e9d5ff', darkBg: '#7c3aed' },
+        { pct: 50, label: 'Halfway there', icon: '🔥', lockedIcon: '📘', color: '#2563eb', lightColor: '#e0f2fe', midColor: '#bfdbfe', darkBg: '#1d4ed8' },
+        { pct: 75, label: 'Almost done', icon: '⭐', lockedIcon: '🎓', color: '#d97706', lightColor: '#fef9c3', midColor: '#fde68a', darkBg: '#b45309' },
+        { pct: 100, label: 'Course master', icon: '🏆', lockedIcon: '👑', color: '#059669', lightColor: '#d1fae5', midColor: '#a7f3d0', darkBg: '#047857' },
+    ].map((m) => {
+        const achieved = courses.some(c => parseFloat(c.completion_percentage) >= m.pct);
+        return (
+            <div key={m.pct} style={{
+                textAlign: 'center', borderRadius: '16px',
+                backgroundColor: '#fff', border: `1.5px solid #e5e7eb`,
+                transition: 'transform 0.2s, box-shadow 0.2s',
+                cursor: 'default', overflow: 'hidden',
+            }}
+                onMouseEnter={e => { e.currentTarget.style.transform = 'translateY(-4px)'; e.currentTarget.style.boxShadow = '0 12px 24px rgba(0,0,0,0.08)'; }}
+                onMouseLeave={e => { e.currentTarget.style.transform = ''; e.currentTarget.style.boxShadow = ''; }}
+            >
+                {/* Top colored strip */}
+                <div style={{
+                    height: '6px',
+                    background: achieved
+                        ? `linear-gradient(90deg, ${m.color}, ${m.midColor})`
+                        : '#e5e7eb',
+                }} />
+
+                <div style={{ padding: '24px 16px 28px' }}>
+                    {/* Circle icon */}
+                    <div style={{
+                        width: '72px', height: '72px', borderRadius: '50%',
+                        background: achieved
+                            ? `linear-gradient(135deg, ${m.lightColor}, ${m.midColor})`
+                            : 'linear-gradient(135deg, #f3f4f6, #e5e7eb)',
+                        display: 'flex', alignItems: 'center', justifyContent: 'center',
+                        margin: '0 auto 16px', fontSize: '32px',
+                        border: `3px solid ${achieved ? m.midColor : '#e5e7eb'}`,
+                    }}>
+                        {achieved ? m.icon : m.lockedIcon}
+                    </div>
+
+                    {/* Percentage */}
+                    <p style={{
+                        fontSize: '34px', fontWeight: 800,
+                        color: achieved ? m.color : '#1c1d1f',
+                        margin: '0 0 4px',
+                    }}>{m.pct}%</p>
+
+                    {/* Label */}
+                    <p style={{
+                        fontSize: '14px', fontWeight: 600,
+                        color: achieved ? m.color : '#6b7280',
+                        margin: '0 0 6px',
+                    }}>{m.label}</p>
+
+                    {/* Progress mini bar */}
+                    <div style={{
+                        width: '80%', height: '4px', backgroundColor: '#e5e7eb',
+                        borderRadius: '2px', margin: '0 auto 14px', overflow: 'hidden',
+                    }}>
+                        <div style={{
+                            height: '100%', borderRadius: '2px',
+                            width: achieved ? '100%' : `${Math.min(parseFloat(avgProgress) / m.pct * 100, 100)}%`,
+                            backgroundColor: achieved ? m.color : '#d1d5db',
+                            transition: 'width 0.5s',
+                        }} />
+                    </div>
+
+                    {/* Badge */}
+                    <span style={{
+                        display: 'inline-block', padding: '6px 20px',
+                        fontSize: '11px', fontWeight: 700, borderRadius: '20px',
+                        letterSpacing: '0.5px',
+                        ...(achieved ? {
+                            backgroundColor: m.color, color: '#fff',
+                        } : {
+                            backgroundColor: '#f3f4f6', color: '#9ca3af',
+                            border: '1px solid #e5e7eb',
+                        }),
+                    }}>
+                        {achieved ? '✓ UNLOCKED' : `${m.pct - Math.round(parseFloat(avgProgress))}% to go`}
+                    </span>
                 </div>
+            </div>
+        );
+    })}
+</div>
             </div>
         </div>
     );
 }
-
-const styles = {
-    page: {
-        minHeight: '100vh',
-        backgroundColor: '#f7f9fa',
-    },
-    container: {
-        maxWidth: '900px',
-        margin: '0 auto',
-        padding: '24px 20px',
-    },
-    loadingContainer: {
-        display: 'flex',
-        justifyContent: 'center',
-        alignItems: 'center',
-        height: '60vh',
-    },
-    loadingText: {
-        fontSize: '16px',
-        color: '#6b7280',
-    },
-
-    // Welcome
-    welcomeCard: {
-        marginBottom: '20px',
-    },
-    welcomeTitle: {
-        fontSize: '24px',
-        fontWeight: 700,
-        color: '#1c1d1f',
-        margin: '0 0 4px',
-    },
-    welcomeSubtitle: {
-        fontSize: '14px',
-        color: '#6b7280',
-        margin: 0,
-    },
-
-    // Stats
-    statsGrid: {
-        display: 'grid',
-        gridTemplateColumns: 'repeat(4, 1fr)',
-        gap: '12px',
-        marginBottom: '20px',
-    },
-    statCard: {
-        backgroundColor: '#fff',
-        borderRadius: '10px',
-        padding: '16px',
-        border: '1px solid #e5e7eb',
-    },
-    statLabel: {
-        fontSize: '12px',
-        color: '#6b7280',
-        margin: '0 0 4px',
-    },
-    statNumber: {
-        fontSize: '26px',
-        fontWeight: 700,
-        color: '#1c1d1f',
-        margin: 0,
-    },
-
-    // Continue Banner
-    continueBanner: {
-        display: 'flex',
-        alignItems: 'center',
-        gap: '16px',
-        padding: '16px 20px',
-        backgroundColor: '#fff',
-        border: '2px solid #7c3aed',
-        borderRadius: '12px',
-        marginBottom: '24px',
-    },
-    continueThumb: {
-        width: '52px',
-        height: '52px',
-        borderRadius: '8px',
-        backgroundColor: '#1c1d1f',
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'center',
-        color: '#fff',
-        fontSize: '14px',
-        fontWeight: 600,
-        flexShrink: 0,
-    },
-    continueInfo: {
-        flex: 1,
-        minWidth: 0,
-    },
-    continueLabel: {
-        fontSize: '11px',
-        color: '#7c3aed',
-        fontWeight: 600,
-        margin: '0 0 2px',
-        letterSpacing: '0.5px',
-    },
-    continueTitle: {
-        fontSize: '15px',
-        fontWeight: 600,
-        color: '#1c1d1f',
-        margin: '0 0 4px',
-        overflow: 'hidden',
-        textOverflow: 'ellipsis',
-        whiteSpace: 'nowrap',
-    },
-    continueSubtitle: {
-        fontSize: '12px',
-        color: '#6b7280',
-        margin: '0 0 6px',
-    },
-    miniProgressTrack: {
-        height: '4px',
-        backgroundColor: '#e5e7eb',
-        borderRadius: '2px',
-        maxWidth: '250px',
-        overflow: 'hidden',
-    },
-    miniProgressFill: {
-        height: '100%',
-        backgroundColor: '#7c3aed',
-        borderRadius: '2px',
-        transition: 'width 0.3s',
-    },
-    resumeBtn: {
-        padding: '10px 24px',
-        backgroundColor: '#7c3aed',
-        color: '#fff',
-        border: 'none',
-        borderRadius: '8px',
-        fontSize: '14px',
-        fontWeight: 600,
-        cursor: 'pointer',
-        whiteSpace: 'nowrap',
-    },
-
-    // Section Title
-    sectionTitle: {
-        fontSize: '20px',
-        fontWeight: 700,
-        color: '#1c1d1f',
-        margin: '0 0 14px',
-    },
-
-    // Course Cards
-    coursesGrid: {
-        display: 'grid',
-        gridTemplateColumns: 'repeat(2, 1fr)',
-        gap: '16px',
-        marginBottom: '28px',
-    },
-    courseCard: {
-        backgroundColor: '#fff',
-        borderRadius: '12px',
-        border: '1px solid #e5e7eb',
-        overflow: 'hidden',
-        cursor: 'pointer',
-        transition: 'box-shadow 0.2s',
-    },
-    courseThumbnail: {
-        height: '100px',
-        backgroundColor: '#1c1d1f',
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'center',
-        position: 'relative',
-    },
-    thumbText: {
-        color: '#fff',
-        fontSize: '14px',
-        fontWeight: 600,
-    },
-    thumbProgress: {
-        position: 'absolute',
-        bottom: 0,
-        left: 0,
-        right: 0,
-        height: '4px',
-        backgroundColor: 'rgba(255,255,255,0.2)',
-    },
-    thumbProgressFill: {
-        height: '100%',
-        backgroundColor: '#7c3aed',
-        transition: 'width 0.3s',
-    },
-    courseBody: {
-        padding: '14px 16px',
-    },
-    courseTitle: {
-        fontSize: '14px',
-        fontWeight: 600,
-        color: '#1c1d1f',
-        margin: '0 0 4px',
-    },
-    courseInstructor: {
-        fontSize: '12px',
-        color: '#6b7280',
-        margin: '0 0 12px',
-    },
-    progressTrack: {
-        height: '6px',
-        backgroundColor: '#e5e7eb',
-        borderRadius: '3px',
-        overflow: 'hidden',
-        marginBottom: '6px',
-    },
-    progressFill: {
-        height: '100%',
-        borderRadius: '3px',
-        transition: 'width 0.3s',
-    },
-    progressInfo: {
-        display: 'flex',
-        justifyContent: 'space-between',
-        marginBottom: '10px',
-    },
-    lectureCount: {
-        fontSize: '12px',
-        color: '#6b7280',
-    },
-    percentText: {
-        fontSize: '12px',
-        fontWeight: 600,
-    },
-    continueBtn: {
-        width: '100%',
-        padding: '8px',
-        backgroundColor: '#7c3aed',
-        color: '#fff',
-        border: 'none',
-        borderRadius: '8px',
-        fontSize: '13px',
-        fontWeight: 600,
-        cursor: 'pointer',
-    },
-    startBtn: {
-        width: '100%',
-        padding: '8px',
-        backgroundColor: 'transparent',
-        color: '#1c1d1f',
-        border: '1px solid #d1d5db',
-        borderRadius: '8px',
-        fontSize: '13px',
-        fontWeight: 600,
-        cursor: 'pointer',
-    },
-
-    // Milestones
-    milestonesGrid: {
-        display: 'grid',
-        gridTemplateColumns: 'repeat(4, 1fr)',
-        gap: '12px',
-        marginBottom: '20px',
-    },
-    milestoneCard: {
-        borderRadius: '10px',
-        padding: '14px',
-        textAlign: 'center',
-    },
-    milestonePct: {
-        fontSize: '22px',
-        fontWeight: 700,
-        margin: '0 0 2px',
-    },
-    milestoneLabel: {
-        fontSize: '11px',
-        fontWeight: 600,
-        margin: '0 0 2px',
-    },
-    milestoneStatus: {
-        fontSize: '10px',
-        color: '#9ca3af',
-        margin: 0,
-    },
-};
