@@ -12,7 +12,7 @@ const getCourseProgress = async(req,res)=>{
             'SELECT * FROM  course_progress WHERE student_id = $1 AND course_id = $2',
             [userId,courseId]
         );
-        res.json(result.rows[0]);
+        res.json(result.rows[0] || { completion_percentage: 0 });
 
     } catch (error) {
         console.error('Error fetching course progress:', error);
@@ -34,7 +34,7 @@ const getLessonProgress = async(req,res) => {
             WHERE vp.student_id = $1 AND s.course_id = $2`,
             [userid,courseId]
         );
-        res.json(result.rows);
+        res.json({lectures:result.rows});
 
     } catch (error) {
         console.error('Error fetching course progress:', error);

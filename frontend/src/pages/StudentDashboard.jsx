@@ -3,6 +3,10 @@ import { useNavigate } from 'react-router-dom';
 import studentAPI from '../services/api';
 import Navbar from '../components/Navbar';
 
+import Footer1 from '../components/Footer1';
+import Footer2 from '../components/Footer2';
+
+
 export default function StudentDashboard() {
     const navigate = useNavigate();
     const [courses, setCourses] = useState([]);
@@ -52,7 +56,7 @@ export default function StudentDashboard() {
     }
 
     return (
-        <div style={{ minHeight: '100vh', backgroundColor: '#f8f9fa' }}>
+        <div style={{ minHeight: '100vh', backgroundColor: '#e6e6e6' }}>
             <Navbar />
 
             <div style={{ maxWidth: '1200px', margin: '0 auto', padding: '28px 48px' }}>
@@ -261,105 +265,109 @@ export default function StudentDashboard() {
                 </div>
 
                 {/* Milestones */}
-               {/* Milestones */}
-<h2 style={{
-    fontSize: '24px', fontWeight: 700, color: '#1c1d1f',
-    margin: '0 0 4px',
-}}>Your milestones</h2>
-<p style={{
-    fontSize: '14px', color: '#6b7280', margin: '0 0 22px',
-}}>Complete courses to unlock achievements</p>
+                {/* Milestones */}
+                <h2 style={{
+                    fontSize: '24px', fontWeight: 700, color: '#1c1d1f',
+                    margin: '0 0 4px',
+                }}>Your milestones</h2>
+                <p style={{
+                    fontSize: '14px', color: '#6b7280', margin: '0 0 22px',
+                }}>Complete courses to unlock achievements</p>
 
-<div style={{
-    display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)',
-    gap: '16px', marginBottom: '48px',
-}}>
-    {[
-        { pct: 25, label: 'Getting started', icon: '🚀', lockedIcon: '🎯', color: '#a435f0', lightColor: '#f3e8ff', midColor: '#e9d5ff', darkBg: '#7c3aed' },
-        { pct: 50, label: 'Halfway there', icon: '🔥', lockedIcon: '📘', color: '#2563eb', lightColor: '#e0f2fe', midColor: '#bfdbfe', darkBg: '#1d4ed8' },
-        { pct: 75, label: 'Almost done', icon: '⭐', lockedIcon: '🎓', color: '#d97706', lightColor: '#fef9c3', midColor: '#fde68a', darkBg: '#b45309' },
-        { pct: 100, label: 'Course master', icon: '🏆', lockedIcon: '👑', color: '#059669', lightColor: '#d1fae5', midColor: '#a7f3d0', darkBg: '#047857' },
-    ].map((m) => {
-        const achieved = courses.some(c => parseFloat(c.completion_percentage) >= m.pct);
-        return (
-            <div key={m.pct} style={{
-                textAlign: 'center', borderRadius: '16px',
-                backgroundColor: '#fff', border: `1.5px solid #e5e7eb`,
-                transition: 'transform 0.2s, box-shadow 0.2s',
-                cursor: 'default', overflow: 'hidden',
-            }}
-                onMouseEnter={e => { e.currentTarget.style.transform = 'translateY(-4px)'; e.currentTarget.style.boxShadow = '0 12px 24px rgba(0,0,0,0.08)'; }}
-                onMouseLeave={e => { e.currentTarget.style.transform = ''; e.currentTarget.style.boxShadow = ''; }}
-            >
-                {/* Top colored strip */}
                 <div style={{
-                    height: '6px',
-                    background: achieved
-                        ? `linear-gradient(90deg, ${m.color}, ${m.midColor})`
-                        : '#e5e7eb',
-                }} />
+                    display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)',
+                    gap: '16px', marginBottom: '48px',
+                }}>
+                    {[
+                        { pct: 25, label: 'Getting started', icon: '🚀', lockedIcon: '🎯', color: '#a435f0', lightColor: '#f3e8ff', midColor: '#e9d5ff', darkBg: '#7c3aed' },
+                        { pct: 50, label: 'Halfway there', icon: '🔥', lockedIcon: '📘', color: '#2563eb', lightColor: '#e0f2fe', midColor: '#bfdbfe', darkBg: '#1d4ed8' },
+                        { pct: 75, label: 'Almost done', icon: '⭐', lockedIcon: '🎓', color: '#d97706', lightColor: '#fef9c3', midColor: '#fde68a', darkBg: '#b45309' },
+                        { pct: 100, label: 'Course master', icon: '🏆', lockedIcon: '👑', color: '#059669', lightColor: '#d1fae5', midColor: '#a7f3d0', darkBg: '#047857' },
+                    ].map((m) => {
+                        const achieved = courses.some(c => parseFloat(c.completion_percentage) >= m.pct);
+                        return (
+                            <div key={m.pct} style={{
+                                textAlign: 'center', borderRadius: '16px',
+                                backgroundColor: '#fff', border: `1.5px solid #e5e7eb`,
+                                transition: 'transform 0.2s, box-shadow 0.2s',
+                                cursor: 'default', overflow: 'hidden',
+                            }}
+                                onMouseEnter={e => { e.currentTarget.style.transform = 'translateY(-4px)'; e.currentTarget.style.boxShadow = '0 12px 24px rgba(0,0,0,0.08)'; }}
+                                onMouseLeave={e => { e.currentTarget.style.transform = ''; e.currentTarget.style.boxShadow = ''; }}
+                            >
+                                {/* Top colored strip */}
+                                <div style={{
+                                    height: '6px',
+                                    background: achieved
+                                        ? `linear-gradient(90deg, ${m.color}, ${m.midColor})`
+                                        : '#e5e7eb',
+                                }} />
 
-                <div style={{ padding: '24px 16px 28px' }}>
-                    {/* Circle icon */}
-                    <div style={{
-                        width: '72px', height: '72px', borderRadius: '50%',
-                        background: achieved
-                            ? `linear-gradient(135deg, ${m.lightColor}, ${m.midColor})`
-                            : 'linear-gradient(135deg, #f3f4f6, #e5e7eb)',
-                        display: 'flex', alignItems: 'center', justifyContent: 'center',
-                        margin: '0 auto 16px', fontSize: '32px',
-                        border: `3px solid ${achieved ? m.midColor : '#e5e7eb'}`,
-                    }}>
-                        {achieved ? m.icon : m.lockedIcon}
-                    </div>
+                                <div style={{ padding: '24px 16px 28px' }}>
+                                    {/* Circle icon */}
+                                    <div style={{
+                                        width: '72px', height: '72px', borderRadius: '50%',
+                                        background: achieved
+                                            ? `linear-gradient(135deg, ${m.lightColor}, ${m.midColor})`
+                                            : 'linear-gradient(135deg, #f3f4f6, #e5e7eb)',
+                                        display: 'flex', alignItems: 'center', justifyContent: 'center',
+                                        margin: '0 auto 16px', fontSize: '32px',
+                                        border: `3px solid ${achieved ? m.midColor : '#e5e7eb'}`,
+                                    }}>
+                                        {achieved ? m.icon : m.lockedIcon}
+                                    </div>
 
-                    {/* Percentage */}
-                    <p style={{
-                        fontSize: '34px', fontWeight: 800,
-                        color: achieved ? m.color : '#1c1d1f',
-                        margin: '0 0 4px',
-                    }}>{m.pct}%</p>
+                                    {/* Percentage */}
+                                    <p style={{
+                                        fontSize: '34px', fontWeight: 800,
+                                        color: achieved ? m.color : '#1c1d1f',
+                                        margin: '0 0 4px',
+                                    }}>{m.pct}%</p>
 
-                    {/* Label */}
-                    <p style={{
-                        fontSize: '14px', fontWeight: 600,
-                        color: achieved ? m.color : '#6b7280',
-                        margin: '0 0 6px',
-                    }}>{m.label}</p>
+                                    {/* Label */}
+                                    <p style={{
+                                        fontSize: '14px', fontWeight: 600,
+                                        color: achieved ? m.color : '#6b7280',
+                                        margin: '0 0 6px',
+                                    }}>{m.label}</p>
 
-                    {/* Progress mini bar */}
-                    <div style={{
-                        width: '80%', height: '4px', backgroundColor: '#e5e7eb',
-                        borderRadius: '2px', margin: '0 auto 14px', overflow: 'hidden',
-                    }}>
-                        <div style={{
-                            height: '100%', borderRadius: '2px',
-                            width: achieved ? '100%' : `${Math.min(parseFloat(avgProgress) / m.pct * 100, 100)}%`,
-                            backgroundColor: achieved ? m.color : '#d1d5db',
-                            transition: 'width 0.5s',
-                        }} />
-                    </div>
+                                    {/* Progress mini bar */}
+                                    <div style={{
+                                        width: '80%', height: '4px', backgroundColor: '#e5e7eb',
+                                        borderRadius: '2px', margin: '0 auto 14px', overflow: 'hidden',
+                                    }}>
+                                        <div style={{
+                                            height: '100%', borderRadius: '2px',
+                                            width: achieved ? '100%' : `${Math.min(parseFloat(avgProgress) / m.pct * 100, 100)}%`,
+                                            backgroundColor: achieved ? m.color : '#d1d5db',
+                                            transition: 'width 0.5s',
+                                        }} />
+                                    </div>
 
-                    {/* Badge */}
-                    <span style={{
-                        display: 'inline-block', padding: '6px 20px',
-                        fontSize: '11px', fontWeight: 700, borderRadius: '20px',
-                        letterSpacing: '0.5px',
-                        ...(achieved ? {
-                            backgroundColor: m.color, color: '#fff',
-                        } : {
-                            backgroundColor: '#f3f4f6', color: '#9ca3af',
-                            border: '1px solid #e5e7eb',
-                        }),
-                    }}>
-                        {achieved ? '✓ UNLOCKED' : `${m.pct - Math.round(parseFloat(avgProgress))}% to go`}
-                    </span>
+                                    {/* Badge */}
+                                    <span style={{
+                                        display: 'inline-block', padding: '6px 20px',
+                                        fontSize: '11px', fontWeight: 700, borderRadius: '20px',
+                                        letterSpacing: '0.5px',
+                                        ...(achieved ? {
+                                            backgroundColor: m.color, color: '#fff',
+                                        } : {
+                                            backgroundColor: '#f3f4f6', color: '#9ca3af',
+                                            border: '1px solid #e5e7eb',
+                                        }),
+                                    }}>
+                                        {achieved ? '✓ UNLOCKED' : `${m.pct - Math.round(parseFloat(avgProgress))}% to go`}
+                                    </span>
+                                </div>
+                            </div>
+                        );
+                    })}
                 </div>
             </div>
-        );
-    })}
-</div>
-            </div>
+
+                     <Footer1 />
+            <Footer2 />
         </div>
+        
     );
 }
