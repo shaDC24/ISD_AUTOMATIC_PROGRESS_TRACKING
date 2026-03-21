@@ -15,5 +15,6 @@ studentAPI.interceptors.request.use((config) => {
 
 export const registerUser = (data) => studentAPI.post('/auth/register', data);
 export const loginUser = (data) => studentAPI.post('/auth/login', data);
+export const getEnrolledCourses = () => studentAPI.get('/progress/enrolled/courses');
 
 export default studentAPI;
