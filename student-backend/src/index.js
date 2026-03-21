@@ -14,8 +14,8 @@ const authRoutes = require('./routes/auth.routes');
 app.use('/api/auth', authRoutes);
 
 
- const progressRoutes = require('./routes/progress_router');
- app.use('/api/progress', progressRoutes);
+const progressRoutes = require('./routes/progress_router');
+app.use('/api/progress', progressRoutes);
 
 //uploading videos and files
 const uploadRoutes = require('./routes/upload.routes');
