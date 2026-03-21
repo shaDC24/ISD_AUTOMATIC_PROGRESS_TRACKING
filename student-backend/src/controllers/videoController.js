@@ -92,7 +92,7 @@ const saveWatchPosition = async (req, res) => {
             100
         );
 
-        // 80% হলে is_completed = true করো
+    
         const isCompleted = completionPercent >= 80;
 
         await pool.query(

@@ -21,11 +21,11 @@ export default function Footer1() {
 
     return (
         <div style = {{
-            width:'1900px'
+            width:'100%'
         }}>
             {/* Teach the world online */}
             <div style={{
-                backgroundColor: '#1c1d1f', padding: '40px 48px',weight:'cover',
+                backgroundColor: '#1c1d1f', padding: '40px 48px',
                 display: 'flex', justifyContent: 'space-between', alignItems: 'center',
             }}>
                 <div>

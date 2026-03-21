@@ -2,7 +2,7 @@
 export default function Footer2() {
     return (
         <div style={{
-            width:"1900px"
+            width:"100%"
         }}>
         <div style={{
             backgroundColor: '#1c1d1f', padding: '16px 48px',

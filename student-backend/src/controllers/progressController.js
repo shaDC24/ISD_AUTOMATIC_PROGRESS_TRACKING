@@ -2,15 +2,15 @@ const db = require('../db');
 
 
 
-const getCourseProgress = async(req,res)=>{
+const getCourseProgress = async (req, res) => {
 
-    try{
-        const {courseId} = req.params;
+    try {
+        const { courseId } = req.params;
         const userId = req.user.id;
 
         const result = await db.query(
             'SELECT * FROM  course_progress WHERE student_id = $1 AND course_id = $2',
-            [userId,courseId]
+            [userId, courseId]
         );
         res.json(result.rows[0] || { completion_percentage: 0 });
 
@@ -21,10 +21,10 @@ const getCourseProgress = async(req,res)=>{
 };
 
 
-const getLessonProgress = async(req,res) => {
+const getLessonProgress = async (req, res) => {
 
-    try{
-        const {courseId} = req.params;
+    try {
+        const { courseId } = req.params;
         const userid = req.user.id;
 
         const result = await db.query(
@@ -32,37 +32,45 @@ const getLessonProgress = async(req,res) => {
             JOIN video_lectures vl ON vp.lecture_id = vl.id
             JOIN sections s ON vl.section_id = s.id 
             WHERE vp.student_id = $1 AND s.course_id = $2`,
-            [userid,courseId]
+            [userid, courseId]
         );
-        res.json({lectures:result.rows});
+        res.json({ lectures: result.rows });
 
     } catch (error) {
         console.error('Error fetching course progress:', error);
-        res.status(500).json({ error: 'Internal server error' });       
-        
+        res.status(500).json({ error: 'Internal server error' });
+
 
     }
 
 };
 
 
-const MarkLessonComplete = async(req,res) => {
+const MarkLessonComplete = async (req, res) => {
 
-    try{
-        const { lectureId, courseId , percentage } = req.body;
+    try {
+        const { lectureId, courseId, percentage } = req.body;
         const userId = req.user.id;
 
         await db.query(
-            `UPDATE video_progress SET is_completed = true,completion_percent = $3 
+            `UPDATE video_progress SET is_completed = true,completion_percent = 100.00 
             WHERE student_id = $1 AND lecture_id = $2`,
-            [userId,lectureId,percentage]
+            [userId, lectureId, percentage]
         );
+        const check = await db.query(
+            'SELECT is_completed FROM video_progress WHERE student_id = $1 AND lecture_id = $2',
+            [userId, lectureId]
+        );
+
+        if (check.rows[0]?.is_completed) {
+            return res.json({ message: 'Already completed' });
+        }
 
         await db.query(
             `UPDATE course_progress SET completed_lectures = completed_lectures + 1,
             completion_percentage = ((completed_lectures + 1)::float / total_lectures) * 100
             WHERE student_id = $1 AND course_id = $2`,
-            [userId,courseId]
+            [userId, courseId]
         );
         res.json({ message: 'Lesson marked as complete' });
     } catch (error) {
@@ -72,8 +80,8 @@ const MarkLessonComplete = async(req,res) => {
 }
 
 
-const getEnrolledCourses = async(req,res)=>{
-    try{
+const getEnrolledCourses = async (req, res) => {
+    try {
         const userId = req.user.id;
 
         const result = await db.query(
@@ -85,7 +93,7 @@ const getEnrolledCourses = async(req,res)=>{
              e.course_id = cp.course_id WHERE e.student_id = $1`,
             [userId]
         );
-        console.log('Enrolled courses:', result.rows.length, result.rows);
+       
         res.json(result.rows);
     } catch (error) {
         console.error('Error fetching enrolled courses:', error);
@@ -114,4 +122,4 @@ const getWeeklyProgress = async (req, res) => {
         res.status(500).json({ error: 'Internal server error' });
     }
 };
-module.exports = { getCourseProgress, getLessonProgress, MarkLessonComplete, getEnrolledCourses ,getWeeklyProgress};
+module.exports = { getCourseProgress, getLessonProgress, MarkLessonComplete, getEnrolledCourses, getWeeklyProgress };
