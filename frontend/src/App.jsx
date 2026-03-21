@@ -4,6 +4,7 @@ import Register from './pages/Register';
 
 import CourseContentPage from './pages/CourseContentPage';
 import StudentDashboard from './pages/StudentDashboard';
+import MyLearning from './pages/MyLearning';
 
 function App() {
     return (
@@ -14,6 +15,7 @@ function App() {
                 <Route path="/register" element={<Register />} />
                 <Route path="/student/course/:courseId" element={<CourseContentPage />} />
                 <Route path="/student/dashboard" element={<StudentDashboard />} />
+                <Route path="/student/my-learning" element={<MyLearning />} />
                 
             </Routes>
         </BrowserRouter>
