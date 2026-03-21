@@ -65,4 +65,22 @@ const MarkLessonComplete = async(req,res) => {
     }
 }
 
-module.exports = { getCourseProgress, getLessonProgress, MarkLessonComplete };
+
+const getEnrolledCourses = async(req,res)=>{
+    try{
+        const userId = req.user.id;
+
+        const result = await db.query(
+            `SELECT c.id, c.title, c.description, c.thumbnail_url,cp.completion_percentage, cp.completed_lectures, cp.total_lectures,e.enrolled_at 
+            FROM enrollments e JOIN courses c ON e.course_id = c.id LEFT JOIN 
+            course_progress cp ON e.student_id = cp.student_id AND e.course_id = cp.course_id WHERE e.student_id = $1`,
+            [userId]
+        );
+        res.json(result.rows);
+    } catch (error) {
+        console.error('Error fetching enrolled courses:', error);
+        res.status(500).json({ error: 'Internal server error' });
+    }
+};
+
+module.exports = { getCourseProgress, getLessonProgress, MarkLessonComplete, getEnrolledCoures };
