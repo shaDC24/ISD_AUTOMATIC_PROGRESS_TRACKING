@@ -28,7 +28,10 @@ const getLessonProgress = async(req,res) => {
         const userid = req.user.id;
 
         const result = await db.query(
-            'SELECT * FROM video_progress vp JOIN video_lectures vl ON vp.lecture_id = vl.id JOIN sections s ON vl.section_id = s.id WHERE vp.student_id = $1 AND s.course_id = $2',
+            `SELECT * FROM video_progress vp 
+            JOIN video_lectures vl ON vp.lecture_id = vl.id
+            JOIN sections s ON vl.section_id = s.id 
+            WHERE vp.student_id = $1 AND s.course_id = $2`,
             [userid,courseId]
         );
         res.json(result.rows);
@@ -50,12 +53,15 @@ const MarkLessonComplete = async(req,res) => {
         const userId = req.user.id;
 
         await db.query(
-            'UPDATE video_progress SET is_completed = true,completion_percent = $3 WHERE student_id = $1 AND lecture_id = $2',
+            `UPDATE video_progress SET is_completed = true,completion_percent = $3 
+            WHERE student_id = $1 AND lecture_id = $2`,
             [userId,lectureId,percentage]
         );
 
         await db.query(
-            'UPDATE course_progress SET completed_lectures = completed_lectures + 1, completion_percentage = ((completed_lectures + 1)::float / total_lectures) * 100 WHERE student_id = $1 AND course_id = $2',
+            `UPDATE course_progress SET completed_lectures = completed_lectures + 1,
+            completion_percentage = ((completed_lectures + 1)::float / total_lectures) * 100
+            WHERE student_id = $1 AND course_id = $2`,
             [userId,courseId]
         );
         res.json({ message: 'Lesson marked as complete' });
@@ -71,11 +77,15 @@ const getEnrolledCourses = async(req,res)=>{
         const userId = req.user.id;
 
         const result = await db.query(
-            `SELECT c.id, c.title, c.description, c.thumbnail_url,cp.completion_percentage, cp.completed_lectures, cp.total_lectures,e.enrolled_at 
+            `SELECT c.id, c.title, c.description, c.thumbnail_url,
+            cp.completion_percentage, cp.completed_lectures, cp.total_lectures,
+            e.enrolled_at 
             FROM enrollments e JOIN courses c ON e.course_id = c.id LEFT JOIN 
-            course_progress cp ON e.student_id = cp.student_id AND e.course_id = cp.course_id WHERE e.student_id = $1`,
+            course_progress cp ON e.student_id = cp.student_id AND
+             e.course_id = cp.course_id WHERE e.student_id = $1`,
             [userId]
         );
+        console.log('Enrolled courses:', result.rows.length, result.rows);
         res.json(result.rows);
     } catch (error) {
         console.error('Error fetching enrolled courses:', error);
@@ -83,4 +93,4 @@ const getEnrolledCourses = async(req,res)=>{
     }
 };
 
-module.exports = { getCourseProgress, getLessonProgress, MarkLessonComplete, getEnrolledCoures };
+module.exports = { getCourseProgress, getLessonProgress, MarkLessonComplete, getEnrolledCourses };
