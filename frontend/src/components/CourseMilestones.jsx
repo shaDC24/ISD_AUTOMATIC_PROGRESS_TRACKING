@@ -9,7 +9,7 @@ export default function CourseMilestones({ courseProgress = 0 }) {
     ];
 
     return (
-        <div style={{ padding: '20px 24px', backgroundColor: '#0f172a', borderTop: '1px solid #1e293b' }}>
+        <div style={{ padding: '20px 24px', backgroundColor: '#292a47', borderTop: '1px solid #1e293b' }}>
             <h3 style={{ fontSize: '16px', fontWeight: 700, color: '#e2e8f0', margin: '0 0 14px' }}>
                 Course milestones
             </h3>

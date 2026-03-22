@@ -1,6 +1,6 @@
 import { useNavigate } from 'react-router-dom';
 
-export default function CourseNavbar({ courseTitle, progress = 0 }) {
+export default function CourseNavbar({ courseTitle, progress = 0, showMilestones, onToggleMilestones }) {
     const navigate = useNavigate();
 
     const circumference = 2 * Math.PI * 14;
@@ -9,11 +9,10 @@ export default function CourseNavbar({ courseTitle, progress = 0 }) {
     return (
         <nav style={{
             display: 'flex', alignItems: 'center',
-            padding: '0 20px', height: '100px',
+            padding: '0 20px', height: '60px',
             backgroundColor: '#1c1d1f',
             borderBottom: '1px solid #2d2f31',
         }}>
-            {/* Logo */}
             <span
                 style={{
                     fontSize: '22px', fontWeight: 800, color: '#fff',
@@ -25,53 +24,47 @@ export default function CourseNavbar({ courseTitle, progress = 0 }) {
                 <span style={{ color: '#a435f0' }}>U</span>demy
             </span>
 
-            {/* Divider */}
-            <div style={{
-                width: '1px', height: '28px', backgroundColor: '#3e4143',
-                marginRight: '20px',
-            }} />
+            <div style={{ width: '1px', height: '28px', backgroundColor: '#3e4143', marginRight: '20px' }} />
 
-            {/* Course Title */}
             <p style={{
                 fontSize: '14px', color: '#e4e4e4', fontWeight: 500,
                 margin: 0, flex: 1, overflow: 'hidden',
                 textOverflow: 'ellipsis', whiteSpace: 'nowrap',
             }}>{courseTitle || 'Course'}</p>
 
-            {/* Leave a rating */}
-            <div style={{
-                display: 'flex', alignItems: 'center', gap: '6px',
-                marginRight: '20px', cursor: 'pointer',
-            }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '6px', marginRight: '20px', cursor: 'pointer' }}>
                 <span style={{ fontSize: '20px' }}>⭐</span>
                 <span style={{ fontSize: '12px', color: '#ccc' }}>Leave a rating</span>
             </div>
 
-            {/* Progress Circle */}
-            <div style={{
-                display: 'flex', alignItems: 'center', gap: '8px',
-                marginRight: '20px', cursor: 'pointer',
-            }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginRight: '12px', cursor: 'pointer' }}>
                 <svg width="36" height="36" viewBox="0 0 36 36">
-                    <circle cx="18" cy="18" r="14" fill="none"
-                        stroke="#3e4143" strokeWidth="3" />
-                    <circle cx="18" cy="18" r="14" fill="none"
-                        stroke="#a435f0" strokeWidth="3"
-                        strokeDasharray={`${filled} ${circumference}`}
-                        strokeLinecap="round"
-                        transform="rotate(-90 18 18)"
-                        style={{ transition: 'stroke-dasharray 0.4s ease' }}
-                    />
+                    <circle cx="18" cy="18" r="14" fill="none" stroke="#3e4143" strokeWidth="3" />
+                    <circle cx="18" cy="18" r="14" fill="none" stroke="#a435f0" strokeWidth="3"
+                        strokeDasharray={`${filled} ${circumference}`} strokeLinecap="round"
+                        transform="rotate(-90 18 18)" style={{ transition: 'stroke-dasharray 0.4s ease' }} />
                 </svg>
                 <div>
                     <p style={{ fontSize: '11px', color: '#ccc', margin: 0 }}>Your Progress</p>
-                    <p style={{ fontSize: '12px', color: '#a435f0', fontWeight: 700, margin: 0 }}>
-                        {Math.round(progress)}%
-                    </p>
+                    <p style={{ fontSize: '12px', color: '#a435f0', fontWeight: 700, margin: 0 }}>{Math.round(progress)}%</p>
                 </div>
             </div>
 
-            {/* Share */}
+            {/* Milestone Trophy Button */}
+            <div
+                onClick={onToggleMilestones}
+                style={{
+                    width: '38px', height: '38px', borderRadius: '50%',
+                    backgroundColor: showMilestones ? '#a435f0' : '#2d2f31',
+                    display: 'flex', alignItems: 'center', justifyContent: 'center',
+                    cursor: 'pointer', border: '1.5px solid #3e4143',
+                    transition: 'background-color 0.2s', marginRight: '12px',
+                }}
+                title="View milestones"
+            >
+                <span style={{ fontSize: '18px' }}>🏆</span>
+            </div>
+
             <button style={{
                 display: 'flex', alignItems: 'center', gap: '6px',
                 padding: '8px 16px', backgroundColor: 'transparent',
@@ -87,7 +80,6 @@ export default function CourseNavbar({ courseTitle, progress = 0 }) {
                 </svg>
             </button>
 
-            {/* Three dots menu */}
             <div style={{
                 display: 'flex', alignItems: 'center', justifyContent: 'center',
                 width: '36px', height: '36px', border: '1px solid #6b7280',

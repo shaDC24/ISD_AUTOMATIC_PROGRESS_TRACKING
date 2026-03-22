@@ -17,6 +17,8 @@ import CircularProgress from '../components/CircularProgress';
 import CourseNavbar from '../components/CourseNavbar';
 import CourseMilestones from '../components/CourseMilestones';
 
+
+
 export default function CourseContentPage() {
     const { courseId } = useParams();
     const navigate = useNavigate();
@@ -27,10 +29,12 @@ export default function CourseContentPage() {
     const [materials, setMaterials] = useState([]);
     const [lectureProgress, setLectureProgress] = useState({}); // {lectureId: percent}
     const [courseProgress, setCourseProgress] = useState(0);
+    const [showMilestones, setShowMilestones] = useState(false);
     const [loading, setLoading] = useState(true);
     const [openSections, setOpenSections] = useState({});
-    
-const [courseTitle, setCourseTitle] = useState('');
+    const [milestonesClosing, setMilestonesClosing] = useState(false);
+
+    const [courseTitle, setCourseTitle] = useState('');
 
     const toggleSection = useCallback((sectionId) => {
         setOpenSections(prev => ({ ...prev, [sectionId]: !prev[sectionId] }));
@@ -49,7 +53,7 @@ const [courseTitle, setCourseTitle] = useState('');
             try {
                 const res = await studentAPI.get(`/courses/${courseId}/lectures`);
                 const lecs = res.data.lectures || [];
-                setCourseTitle(res.data.title || 'Course'); 
+                setCourseTitle(res.data.title || 'Course');
                 setLectures(lecs);
                 // Auto-open all sections on first load
                 const openAll = {};
@@ -148,211 +152,257 @@ const [courseTitle, setCourseTitle] = useState('');
 
     return (
         <>
-      
-        <div style={styles.layout}>
-            {/* ── Left Sidebar ─────────────────────────────────────────────── */}
-            <aside style={styles.sidebar}>
-                <div style={styles.sidebarHeader}>
-                    <button onClick={() => navigate('/student/dashboard')} style={styles.backBtn}>
-                        ← Back
-                    </button>
-                    <h3 style={styles.sidebarTitle}>Course Content</h3>
-                </div>
 
-                {/* Lecture list — Section grouped like Udemy */}
-                <div style={styles.lectureList}>
-                    {(() => {
-                        // Group lectures by section
-                        const sections = {};
-                        lectures.forEach((lecture, idx) => {
-                            const key = lecture.section_id;
-                            if (!sections[key]) {
-                                sections[key] = {
-                                    title:    lecture.section_title,
-                                    position: lecture.section_position,
-                                    lectures: [],
-                                };
-                            }
-                            sections[key].lectures.push({ ...lecture, globalIdx: idx });
-                        });
+            <div style={styles.layout}>
+                {/* ── Left Sidebar ─────────────────────────────────────────────── */}
+                <aside style={styles.sidebar}>
+                    <div style={styles.sidebarHeader}>
+                        <button onClick={() => navigate('/student/dashboard')} style={styles.backBtn}>
+                            ← Back
+                        </button>
+                        <h3 style={styles.sidebarTitle}>Course Content</h3>
+                    </div>
 
-                        return Object.values(sections)
-                            .sort((a, b) => a.position - b.position)
-                            .map(section => (
-                                <div key={section.title}>
-                                    {/* Section header — collapsible dropdown */}
-                                    {(() => {
-                                        const sectionId  = section.lectures[0]?.section_id;
-                                        const isOpen     = openSections[sectionId] !== false;
-                                        const doneCount  = section.lectures.filter(l => completedIds.has(l.id)).length;
-                                        const totalMins  =  Math.floor(
-                                            section.lectures.reduce((s, l) => s + (parseFloat(l.duration) || 0), 0) / 60
-                                        );
-                                        return (
-                                            <div
-                                                style={styles.sectionHeader}
-                                                onClick={() => toggleSection(sectionId)}
-                                            >
-                                                <span style={{
-                                                    ...styles.sectionArrow,
-                                                    transform: isOpen ? 'rotate(90deg)' : 'rotate(0deg)',
-                                                }}>▶</span>
-                                                <div style={{ flex: 1, minWidth: 0 }}>
-                                                    <div style={styles.sectionTitle}>{section.title}</div>
-                                                    <div style={styles.sectionMeta}>
-                                                        {section.lectures.length} lectures · {totalMins}m
-                                                        {doneCount > 0 && ` · ${doneCount}/${section.lectures.length} completed`}
-                                                    </div>
-                                                </div>
-                                            </div>
-                                        );
-                                    })()}
+                    {/* Lecture list — Section grouped like Udemy */}
+                    <div style={styles.lectureList}>
+                        {(() => {
+                            // Group lectures by section
+                            const sections = {};
+                            lectures.forEach((lecture, idx) => {
+                                const key = lecture.section_id;
+                                if (!sections[key]) {
+                                    sections[key] = {
+                                        title: lecture.section_title,
+                                        position: lecture.section_position,
+                                        lectures: [],
+                                    };
+                                }
+                                sections[key].lectures.push({ ...lecture, globalIdx: idx });
+                            });
 
-                                    {/* Lectures — show only when section is open */}
-                                    {openSections[section.lectures[0]?.section_id] !== false && section.lectures.map(lecture => {
-                                        const isDone     = completedIds.has(lecture.id);
-                                        const isSelected = lecture.globalIdx === selectedIdx;
-                                        const prog       = lectureProgress[lecture.id];
-                                        const percent    = prog?.percent || 0;
-                                        const mins       = Math.floor((parseFloat(lecture.duration) || 0) / 60);
-                                        const secs       = Math.floor((parseFloat(lecture.duration) || 0) % 60);
-                                        const durationStr = mins > 0
-                                            ? `${mins}m ${secs > 0 ? secs + 's' : ''}`
-                                            : `${secs}s`;
-
-                                        // Materials for this section
-                                        const sectionMats = materials.filter(
-                                            m => m.section_id === lecture.section_id
-                                        );
-
-                                        return (
-                                            <div key={lecture.id}>
-                                                {/* Lecture row */}
+                            return Object.values(sections)
+                                .sort((a, b) => a.position - b.position)
+                                .map(section => (
+                                    <div key={section.title}>
+                                        {/* Section header — collapsible dropdown */}
+                                        {(() => {
+                                            const sectionId = section.lectures[0]?.section_id;
+                                            const isOpen = openSections[sectionId] !== false;
+                                            const doneCount = section.lectures.filter(l => completedIds.has(l.id)).length;
+                                            const totalMins = Math.floor(
+                                                section.lectures.reduce((s, l) => s + (parseFloat(l.duration) || 0), 0) / 60
+                                            );
+                                            return (
                                                 <div
-                                                    onClick={() => { cancelCountdown(); setSelectedIdx(lecture.globalIdx); }}
-                                                    style={{
-                                                        ...styles.lectureItem,
-                                                        ...(isSelected ? styles.lectureItemActive : {}),
-                                                    }}
+                                                    style={styles.sectionHeader}
+                                                    onClick={() => toggleSection(sectionId)}
                                                 >
-                                                    <CircularProgress
-                                                        percent={percent}
-                                                        isCompleted={isDone}
-                                                        size={26}
-                                                    />
+                                                    <span style={{
+                                                        ...styles.sectionArrow,
+                                                        transform: isOpen ? 'rotate(90deg)' : 'rotate(0deg)',
+                                                    }}>▶</span>
                                                     <div style={{ flex: 1, minWidth: 0 }}>
-                                                        <p style={styles.lectureName}>{lecture.title}</p>
-                                                        <p style={styles.lectureMeta}>
-                                                            🕐 {durationStr}
-                                                            {isDone && ' · ✓ Completed'}
-                                                            {!isDone && percent > 0 && ` · ${Math.round(percent)}% watched`}
-                                                        </p>
+                                                        <div style={styles.sectionTitle}>{section.title}</div>
+                                                        <div style={styles.sectionMeta}>
+                                                            {section.lectures.length} lectures · {totalMins}m
+                                                            {doneCount > 0 && ` · ${doneCount}/${section.lectures.length} completed`}
+                                                        </div>
                                                     </div>
                                                 </div>
+                                            );
+                                        })()}
 
-                                                {/* Materials — show only under selected lecture */}
-                                                {isSelected && sectionMats.length > 0 && (
-                                                    <div style={styles.materialsBox}>
-                                                        <p style={styles.materialsTitle}> Section Materials</p>
-                                                        {sectionMats.map(mat => (
-                                                            <a
-                                                                key={mat.id}
-                                                                href={mat.file_url}
-                                                                target="_blank"
-                                                                rel="noreferrer"
-                                                                style={styles.materialLink}
-                                                                download={mat.download_allowed}
-                                                            >
-                                                                <span style={styles.materialIcon}>
-                                                                    {mat.file_type === 'pdf'  ? '📄' :
-                                                                     mat.file_type === 'zip'  ? '📦' :
-                                                                     mat.file_type === 'ppt' || mat.file_type === 'pptx' ? '📊' : '📁'}
-                                                                </span>
-                                                                <span style={styles.materialName}>{mat.title}</span>
-                                                                {mat.download_allowed && (
-                                                                    <span style={styles.downloadBadge}>↓ Download</span>
-                                                                )}
-                                                            </a>
-                                                        ))}
+                                        {/* Lectures — show only when section is open */}
+                                        {openSections[section.lectures[0]?.section_id] !== false && section.lectures.map(lecture => {
+                                            const isDone = completedIds.has(lecture.id);
+                                            const isSelected = lecture.globalIdx === selectedIdx;
+                                            const prog = lectureProgress[lecture.id];
+                                            const percent = prog?.percent || 0;
+                                            const mins = Math.floor((parseFloat(lecture.duration) || 0) / 60);
+                                            const secs = Math.floor((parseFloat(lecture.duration) || 0) % 60);
+                                            const durationStr = mins > 0
+                                                ? `${mins}m ${secs > 0 ? secs + 's' : ''}`
+                                                : `${secs}s`;
+
+                                            // Materials for this section
+                                            const sectionMats = materials.filter(
+                                                m => m.section_id === lecture.section_id
+                                            );
+
+                                            return (
+                                                <div key={lecture.id}>
+                                                    {/* Lecture row */}
+                                                    <div
+                                                        onClick={() => { cancelCountdown(); setSelectedIdx(lecture.globalIdx); }}
+                                                        style={{
+                                                            ...styles.lectureItem,
+                                                            ...(isSelected ? styles.lectureItemActive : {}),
+                                                        }}
+                                                    >
+                                                        <CircularProgress
+                                                            percent={percent}
+                                                            isCompleted={isDone}
+                                                            size={26}
+                                                        />
+                                                        <div style={{ flex: 1, minWidth: 0 }}>
+                                                            <p style={styles.lectureName}>{lecture.title}</p>
+                                                            <p style={styles.lectureMeta}>
+                                                                🕐 {durationStr}
+                                                                {isDone && ' · ✓ Completed'}
+                                                                {!isDone && percent > 0 && ` · ${Math.round(percent)}% watched`}
+                                                            </p>
+                                                        </div>
                                                     </div>
-                                                )}
-                                            </div>
-                                        );
-                                    })}
-                                </div>
-                            ));
-                    })()}
-                </div>
 
-
-                {/* Course progress bar */}
-                <div style={styles.progressBox}>
-                    <div style={styles.progressTopRow}>
-                        <span style={styles.progressLabel}>Your progress</span>
-                        <span style={styles.progressPct}>{Math.round(courseProgress)}%</span>
+                                                    {/* Materials — show only under selected lecture */}
+                                                    {isSelected && sectionMats.length > 0 && (
+                                                        <div style={styles.materialsBox}>
+                                                            <p style={styles.materialsTitle}> Section Materials</p>
+                                                            {sectionMats.map(mat => (
+                                                                <a
+                                                                    key={mat.id}
+                                                                    href={mat.file_url}
+                                                                    target="_blank"
+                                                                    rel="noreferrer"
+                                                                    style={styles.materialLink}
+                                                                    download={mat.download_allowed}
+                                                                >
+                                                                    <span style={styles.materialIcon}>
+                                                                        {mat.file_type === 'pdf' ? '📄' :
+                                                                            mat.file_type === 'zip' ? '📦' :
+                                                                                mat.file_type === 'ppt' || mat.file_type === 'pptx' ? '📊' : '📁'}
+                                                                    </span>
+                                                                    <span style={styles.materialName}>{mat.title}</span>
+                                                                    {mat.download_allowed && (
+                                                                        <span style={styles.downloadBadge}>↓ Download</span>
+                                                                    )}
+                                                                </a>
+                                                            ))}
+                                                        </div>
+                                                    )}
+                                                </div>
+                                            );
+                                        })}
+                                    </div>
+                                ));
+                        })()}
                     </div>
-                    <div style={styles.progressTrack}>
-                        <div style={{ ...styles.progressFill, width: `${courseProgress}%` }} />
+
+
+                    {/* Course progress bar */}
+                    <div style={styles.progressBox}>
+                        <div style={styles.progressTopRow}>
+                            <span style={styles.progressLabel}>Your progress</span>
+                            <span style={styles.progressPct}>{Math.round(courseProgress)}%</span>
+                        </div>
+                        <div style={styles.progressTrack}>
+                            <div style={{ ...styles.progressFill, width: `${courseProgress}%` }} />
+                        </div>
+                        <p style={styles.progressSub}>
+                            {completedIds.size} / {lectures.length} lectures completed
+                        </p>
                     </div>
-                    <p style={styles.progressSub}>
-                        {completedIds.size} / {lectures.length} lectures completed
-                    </p>
-                </div>
 
-                
-            </aside>
 
-            {/* ── Right Panel ──────────────────────────────────────────────── */}
-            <main style={styles.main}>
-                 <CourseNavbar 
-        courseTitle={courseTitle} 
-        progress={courseProgress} 
-    />
-                
-    
-                {selectedLecture ? (
-                    <div style={{ position: 'relative' }}>
-                        <VideoPlayer
-                            key={selectedLecture.id}
-                            videoIdProp={selectedLecture.id}
-                            courseIdProp={courseId}
-                            studentIdProp={studentId}
-                            onComplete={() => handleLectureComplete(selectedLecture.id)}
-                            onNextLecture={
-                                selectedIdx < lectures.length - 1
-                                    ? () => { cancelCountdown(); setSelectedIdx(i => i + 1); }
-                                    : null
+                </aside>
+
+                {/* ── Right Panel ──────────────────────────────────────────────── */}
+                <main style={styles.main}>
+                    <CourseNavbar
+                        courseTitle={courseTitle}
+                        progress={courseProgress}
+                        showMilestones={showMilestones}
+                        onToggleMilestones={() => {
+                            if (showMilestones) {
+                                setMilestonesClosing(true);
+                                setTimeout(() => {
+                                    setShowMilestones(false);
+                                    setMilestonesClosing(false);
+                                }, 300);
+                            } else {
+                                setShowMilestones(true);
                             }
-                        />
+                        }}
+                    />
 
-                        {/* Auto-advance banner */}
-                        {countdown !== null && (
-                            <div style={styles.advanceBanner}>
-                                <span>
-                                    🎉 Lecture complete! Next lecture in <strong>{countdown}s</strong>
-                                </span>
-                                <div style={styles.advanceBtns}>
-                                    <button
-                                        onClick={() => { cancelCountdown(); setSelectedIdx(i => i + 1); }}
-                                        style={styles.nextBtn}
-                                    >
-                                        Next Now →
-                                    </button>
-                                    <button onClick={cancelCountdown} style={styles.cancelBtn}>
-                                        Stay here
-                                    </button>
-                                </div>
+
+                    {showMilestones && (
+                        <>
+                            <div
+                                onClick={() => {
+                                    setMilestonesClosing(true);
+                                    setTimeout(() => {
+                                        setShowMilestones(false);
+                                        setMilestonesClosing(false);
+                                    }, 300);
+                                }}
+                                style={{
+                                    position: 'absolute', top: 0, left: 0, right: 0, bottom: 0,
+                                    backgroundColor: 'rgba(0,0,0,0.15)',
+                                    zIndex: 50,
+                                    animation: milestonesClosing ? 'fadeOut 0.3s ease' : 'fadeIn 0.3s ease',
+                                }}
+                            />
+                            <div style={{
+                                position: 'absolute', top: '60px', left: 0, right: 0,
+                                zIndex: 51,
+                                animation: milestonesClosing ? 'slideUp 0.3s ease' : 'slideDown 0.4s ease',
+                                boxShadow: '0 20px 60px rgba(0,0,0,0.5)',
+                            }}>
+                                <CourseMilestones courseProgress={courseProgress} />
                             </div>
-                        )}
-                    </div>
-                ) : (
-                    <div style={styles.center}>
-                        <p style={{ color: '#9ca3af' }}>Select a lecture to start watching</p>
-                    </div>
-                )}
-                  <CourseMilestones courseProgress={courseProgress} />
-            </main>
-        </div>
+                            <style>{`
+            @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+            @keyframes fadeOut { from { opacity: 1; } to { opacity: 0; } }
+            @keyframes slideDown { from { opacity: 0; transform: translateY(-20px); } to { opacity: 1; transform: translateY(0); } }
+            @keyframes slideUp { from { opacity: 1; transform: translateY(0); } to { opacity: 0; transform: translateY(-20px); } }
+        `}</style>
+                        </>
+                    )}
+
+                    {selectedLecture ? (
+                        <div style={{ position: 'relative' }}>
+                            <VideoPlayer
+                                key={selectedLecture.id}
+                                videoIdProp={selectedLecture.id}
+                                courseIdProp={courseId}
+                                studentIdProp={studentId}
+                                onComplete={() => handleLectureComplete(selectedLecture.id)}
+                                onNextLecture={
+                                    selectedIdx < lectures.length - 1
+                                        ? () => { cancelCountdown(); setSelectedIdx(i => i + 1); }
+                                        : null
+                                }
+                            />
+
+                            {/* Auto-advance banner */}
+                            {countdown !== null && (
+                                <div style={styles.advanceBanner}>
+                                    <span>
+                                        🎉 Lecture complete! Next lecture in <strong>{countdown}s</strong>
+                                    </span>
+                                    <div style={styles.advanceBtns}>
+                                        <button
+                                            onClick={() => { cancelCountdown(); setSelectedIdx(i => i + 1); }}
+                                            style={styles.nextBtn}
+                                        >
+                                            Next Now →
+                                        </button>
+                                        <button onClick={cancelCountdown} style={styles.cancelBtn}>
+                                            Stay here
+                                        </button>
+                                    </div>
+                                </div>
+                            )}
+                        </div>
+                    ) : (
+                        <div style={styles.center}>
+                            <p style={{ color: '#9ca3af' }}>Select a lecture to start watching</p>
+                        </div>
+                    )}
+
+                </main>
+            </div>
         </>
     );
 }
