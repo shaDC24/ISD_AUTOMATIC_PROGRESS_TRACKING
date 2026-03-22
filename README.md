@@ -41,15 +41,17 @@ ISD_AUTOMATIC_PROGRESS_TRACKING/
 │   ├── package-lock.json
 │   ├── .gitignore
 │   └── src/
-│       ├── App.jsx                        (Tanmi + Shatabdi + arpita adds routes)
+│       ├── App.jsx                        (Tanmi + Shatabdi + Arpita adds routes)
 │       ├── main.jsx
-│       ├── ├── pages/
+│       ├── pages/
 │       │   ├── Login.jsx                  (Tanmi → Arpita redesigned)
 │       │   ├── Register.jsx               (Tanmi)
 │       │   ├── StudentDashboard.jsx       (Arpita)
 │       │   ├── MyLearning.jsx             (Arpita)
 │       │   ├── VideoPlayer.jsx            (Shatabdi)
-│       │   └── CourseContentPage.jsx      (Shatabdi)
+│       │   |── CourseContentPage.jsx      (Shatabdi)
+        |   ├── HomePage.jsx                (Arpita)
+
 │       ├── components/
 │       │   ├── Navbar.jsx                 (Arpita)
 │       │   ├── CourseNavbar.jsx           (Arpita)
@@ -59,7 +61,8 @@ ISD_AUTOMATIC_PROGRESS_TRACKING/
 │       │   ├── Footer1.jsx               (Arpita)
 │       │   ├── Footer2.jsx               (Arpita)
 │       │   ├── ProgressBar.jsx            (Shatabdi)
-│       │   └── CircularProgress.jsx       (Arpita)
+│       │   |── CircularProgress.jsx       (Shatabdi)
+        |   ├── CourseCarousel.jsx        (Arpita)
 │       ├── hooks/
 │       │   └── useVideoProgress.js        (Shatabdi)
 │       └── services/
@@ -346,7 +349,7 @@ Each member works on their own branch and opens a PR to `main`.
 |----------|----------|---------|-------------|
 | Tanmi    | Login.jsx, Register.jsx, App.jsx, api.js | index.js, db.js, authController.js, auth.routes.js | student-schema.sql, seed.sql, .env.example |
 | Shatabdi | VideoPlayer.jsx, CourseContentPage.jsx, ProgressBar.jsx, CircularProgress.jsx, useVideoProgress.js | auth.middleware.js, videoController.js, courseController.js, uploadController.js, upload.middleware.js, cloudinary.js, video/course/upload routes | subtitle_url + reviews in schema, Cloudinary URLs in seed.sql |
-|Arpita   | StudentDashboard.jsx, MyLearning.jsx, Login.jsx (redesign), Navbar.jsx, CourseNavbar.jsx, CourseMilestones.jsx, LearningStreak.jsx, WeeklyProgress.jsx, Footer1.jsx, Footer2.jsx, api.js (added) | progressController.js, progress_router.js | — |
+| Arpita   | StudentDashboard.jsx, MyLearning.jsx, HomePage.jsx, Login.jsx (redesign), Navbar.jsx, CourseNavbar.jsx, CourseMilestones.jsx, CourseCarousel.jsx, LearningStreak.jsx, WeeklyProgress.jsx, Footer1.jsx, Footer2.jsx, api.js (added) | progressController.js, progress_router.js | — |
 | Shadman  | — | — | — |
 | Niaz     | — | — | — |
 | Tamanna  | — | — | — |

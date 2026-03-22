@@ -60,6 +60,15 @@ This data flows back to:
 - Social login buttons (Google, Facebook, Apple)
 - Purple Udemy theming
 
+
+**HomePage.jsx** — Landing page (first page visitors see)
+- Sticky navbar with Log in + Sign up buttons
+- Hero image slider with auto-slide (3 banners, arrows, dots)
+- Stats section (220,000+ lectures, 75,000+ courses, 62M+ students)
+- 4 feature cards with hover float animation
+- Dark CTA section with Sign up + Log in
+- Footer1 + Footer2
+
 ### Components
 
 **Navbar.jsx** — Udemy-style top navigation
@@ -101,6 +110,13 @@ This data flows back to:
 - Udemy logo, Copyright, Cookie Settings, Language selector
 - Purple top border accent
 
+
+**CourseCarousel.jsx** — Horizontal scrollable course cards
+- Enrolled courses + recommended dummy courses
+- Left/Right arrow navigation with circular scroll
+- Hover popup showing course details
+- Progress bars on enrolled courses
+- Star ratings + student count
 ### Services
 
 **api.js** — Added `getEnrolledCourses` function for dashboard API calls
@@ -137,5 +153,6 @@ Schema designed by Tanmi — I query these tables in my controller.
 | Footer1.jsx | Frontend | ~60 | Full footer |
 | Footer2.jsx | Frontend | ~40 | Bottom bar |
 | api.js | Frontend | ~5 (added) | API service function |
-
+| HomePage.jsx | Frontend | ~200 | Landing page with hero slider |
+| CourseCarousel.jsx | Frontend | ~180 | Carousel with hover popup cards |
 
