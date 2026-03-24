@@ -131,6 +131,8 @@ useEffect(() => {
     return () => clearInterval(interval);
 }, [courseId]);
 
+    // Called at 80% — silently update sidebar checkmark + course %
+    // Do NOT start countdown here — countdown only starts at 100% (video ended)
     const handleLectureComplete = useCallback((videoId) => {
     setCompletedIds(prev => new Set([...prev, parseInt(videoId)]));
     
@@ -139,16 +141,13 @@ useEffect(() => {
         studentAPI.get(`/progress/${courseId}`)
             .then(res => {
                 const pct = parseFloat(res.data.completion_percentage || 0);
-                console.log('Updated progress:', pct);
+               // console.log('Updated progress:', pct);
                 setCourseProgress(pct);
             })
             .catch(() => {});
     }, 500);
 
-    if (selectedIdx < lectures.length - 1) {
-        startCountdown();
-    }
-}, [selectedIdx, lectures.length, courseId]);
+}, [courseId]);
 
     // ── Auto-advance countdown (5s) ───────────────────────────────────────────
     const startCountdown = useCallback(() => {
