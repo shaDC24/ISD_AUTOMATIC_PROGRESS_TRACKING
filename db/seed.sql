@@ -4,11 +4,9 @@
 -- CSE 326: ISD Sessional | Group C1_4
 -- ============================================
  TRUNCATE TABLE
-    material_access, course_progress,
+    material_access, reviews, course_progress,
     video_progress, enrollments, materials,
     video_lectures, sections, courses, users
-    -- reviews
-
 RESTART IDENTITY CASCADE;
 -- ============================================
 -- 1. USERS
