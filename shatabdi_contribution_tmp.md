@@ -167,6 +167,28 @@ CLOUDINARY_API_SECRET=your_api_secret
 
 ---
 
+## CI/CD & Testing
+
+### `.github/workflows/ci.yml`
+GitHub Actions pipeline that runs automatically on every push/PR to main:
+- Spins up PostgreSQL test database
+- Runs backend unit tests
+- Checks frontend build
+
+### `student-backend/tests/videoController.test.js`
+Unit + Integration tests for video API:
+- `GET /video/:lectureId/url` — 200, 404, 401
+- `GET /video/last-position/:lectureId` — first time, resume, completed
+- `POST /video/watch-position` — save, 400, 100% cap, 401
+- Integration: Save → Fetch → Resume flow
+
+Run tests:
+```bash
+cd student-backend
+npm test
+```
+---
+
 ## Git Branches
 
 | Branch | Status |

@@ -7,7 +7,7 @@
 
 | Student ID | Name                       | Role                        |
 |------------|----------------------------|-----------------------------|
-| 2105123    | Shatabdi Dutta Chowdhury   | Student UI + Video API   |
+| 2105123    | Shatabdi Dutta Chowdhury   | Student UI + Video API + CI/CD for videos   |
 | 2105124    | Md. Shadman Abid            | Instructor DevOps + Student Progress UI |
 | 2105125    | Md. Yousuf Niaz             | Instructor Analytics UI + API |
 | 2105137    | Arpita Dhar                 | Student Progress API + DB Models |
@@ -334,7 +334,9 @@ Each member works on their own branch and opens a PR to `main`.
 | Branch                        | Owner    |
 |-------------------------------|----------|
 | `tanmi/db-schema-auth`        | Tanmi    |
-| `student/video-player`        | Shatabdi |
+| `shatabdi/video-player`       | Shatabdi |
+| `shatabdi/frontend-pages`     | Shatabdi |
+| `shatabdi/ux-improvements`    | Shatabdi |
 | `student/progress-api`        | Arpita   |
 | `student/devops`              | Shadman  |
 | `instructor/analytics-ui`     | Niaz     |
@@ -348,7 +350,7 @@ Each member works on their own branch and opens a PR to `main`.
 | Member   | Frontend | Backend | DB / Config |
 |----------|----------|---------|-------------|
 | Tanmi    | Login.jsx, Register.jsx, App.jsx, api.js | index.js, db.js, authController.js, auth.routes.js | student-schema.sql, seed.sql, .env.example |
-| Shatabdi | VideoPlayer.jsx, CourseContentPage.jsx, ProgressBar.jsx, CircularProgress.jsx, useVideoProgress.js | auth.middleware.js, videoController.js, courseController.js, uploadController.js, upload.middleware.js, cloudinary.js, video/course/upload routes | subtitle_url + reviews in schema, Cloudinary URLs in seed.sql |
+| Shatabdi | VideoPlayer.jsx, CourseContentPage.jsx, ProgressBar.jsx, CircularProgress.jsx, useVideoProgress.js | auth.middleware.js, videoController.js, courseController.js, uploadController.js, upload.middleware.js, cloudinary.js, video/course/upload routes | subtitle_url in schema, Cloudinary URLs in seed.sql, GitHub Actions CI/CD, unit tests |
 | Arpita   | StudentDashboard.jsx, MyLearning.jsx, HomePage.jsx, Login.jsx (redesign), Navbar.jsx, CourseNavbar.jsx, CourseMilestones.jsx, CourseCarousel.jsx, LearningStreak.jsx, WeeklyProgress.jsx, Footer1.jsx, Footer2.jsx, api.js (added) | progressController.js, progress_router.js | — |
 | Shadman  | — | — | — |
 | Niaz     | — | — | — |
