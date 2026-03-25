@@ -1,0 +1,80 @@
+name: Student Backend CI
+
+on:
+  push:
+    branches: [ main, shatabdi/* ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  lint-and-test:
+    runs-on: ubuntu-latest
+
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_DB: progress_tracker_test
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+          cache: 'npm'
+          cache-dependency-path: student-backend/package-lock.json
+
+      - name: Install dependencies
+        working-directory: student-backend
+        run: npm install
+
+      - name: Setup test database
+        env:
+          PGPASSWORD: postgres
+        run: |
+          psql -h localhost -U postgres -d progress_tracker_test -f db/student-schema.sql
+
+      - name: Run unit tests
+        working-directory: student-backend
+        env:
+          DATABASE_URL: postgresql://postgres:postgres@localhost:5432/progress_tracker_test
+          JWT_SECRET: test_secret_key
+          JWT_EXPIRES_IN: 7d
+          NODE_ENV: test
+        run: npm test
+
+  frontend-check:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+          cache: 'npm'
+          cache-dependency-path: frontend/package-lock.json
+
+      - name: Install dependencies
+        working-directory: frontend
+        run: npm install
+
+      - name: Build check
+        working-directory: frontend
+        env:
+          VITE_STUDENT_API_URL: http://localhost:5000/api
+        run: npm run build
