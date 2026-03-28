@@ -34,15 +34,15 @@
 ISD_AUTOMATIC_PROGRESS_TRACKING/
 │
 ├── frontend/
-│   ├── index.html
-│   ├── vite.config.js
-│   ├── eslint.config.js
-│   ├── package.json
-│   ├── package-lock.json
-│   ├── .gitignore
+│   ├── index.html                  (Tanmi)
+│   ├── vite.config.js              (Tanmi)
+│   ├── eslint.config.js            (Tanmi)
+│   ├── package.json                (Tanmi)
+│   ├── package-lock.json           (Tanmi)
+│   ├── .gitignore                  (Tanmi)
 │   └── src/
 │       ├── App.jsx                        (Tanmi + Shatabdi + Arpita adds routes)
-│       ├── main.jsx
+│       ├── main.jsx                       (Tanmi)
 │       ├── pages/
 │       │   ├── Login.jsx                  (Tanmi → Arpita redesigned)
 │       │   ├── Register.jsx               (Tanmi)
@@ -69,8 +69,8 @@ ISD_AUTOMATIC_PROGRESS_TRACKING/
 │           └── api.js                     (Tanmi)     
 │
 ├── student-backend/
-│   ├── package.json
-│   ├── package-lock.json
+│   ├── package.json                       (Tanmi)
+│   ├── package-lock.json                  (Tanmi)
 │   ├── .gitignore
 │   └── src/
 │       ├── index.js                       (Tanmi + Shatabdi routes added)
@@ -98,8 +98,8 @@ ISD_AUTOMATIC_PROGRESS_TRACKING/
 │   ├── instructor-schema.sql              (Tanmi)
 │   └── seed.sql                           (Tanmi + Shatabdi: real datas)
 │
-├── .gitignore
-├── .env.example
+├── .gitignore                             (Tanmi)
+├── .env.example                           (Tanmi)
 └── README.md
 ```
 
