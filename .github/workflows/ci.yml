@@ -84,18 +84,24 @@ jobs:
         with:
           name: frontend-dist
           path: frontend/dist/
+ 
+ 
   deploy-frontend:
     needs: [lint-and-test, frontend-check]
     if: github.ref == 'refs/heads/main' && github.event_name == 'push'
     runs-on: ubuntu-latest
 
     steps:
+      - name: Run tests 
+        run: npm run test
+      - name: Build appliation
+        run: npm run build  
       - name: Download build artifact
         uses: actions/download-artifact@v4
         with:
           name: frontend-dist
           path: dist
-
+        
       - name: Deploy to Netlify
         run: npx netlify-cli deploy --prod --dir=dist
         env:
