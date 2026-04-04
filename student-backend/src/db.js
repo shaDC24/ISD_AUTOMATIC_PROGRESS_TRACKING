@@ -3,7 +3,7 @@ const dns = require('dns');
 
 const { Pool } = require('pg');
 const dotenv = require('dotenv');
-const dns = require('dns');
+// const dns = require('dns');
 
 dotenv.config();
 
