@@ -209,6 +209,30 @@ jobs:
           name: frontend-dist
           path: frontend/dist/
  
+  # deploy-frontend:
+  #   needs: [lint-and-test, frontend-check]
+  #   if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+  #   runs-on: ubuntu-latest
+  #   steps:
+  #     - name: Checkout code
+  #       uses: actions/checkout@v4
+
+  #     - name: Setup Node.js
+  #       uses: actions/setup-node@v4
+  #       with:
+  #         node-version: '22'
+
+  #     - name: Download build artifact
+  #       uses: actions/download-artifact@v4
+  #       with:
+  #         name: frontend-dist
+  #         path: dist
+        
+  #     - name: Deploy to Netlify
+  #       run: npx netlify-cli deploy --prod --dir=dist
+  #       env:
+  #         NETLIFY_AUTH_TOKEN: ${{ secrets.NETLIFY_AUTH_TOKEN }}
+  #         NETLIFY_TEAM_ID: ${{ secrets.NETLIFY_TEAM_ID }}
   deploy-frontend:
     needs: [lint-and-test, frontend-check]
     if: github.ref == 'refs/heads/main' && github.event_name == 'push'
@@ -221,6 +245,12 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: '22'
+          cache: 'npm'
+          cache-dependency-path: frontend/package-lock.json
+
+      - name: Install dependencies
+        working-directory: frontend
+        run: npm install
 
       - name: Download build artifact
         uses: actions/download-artifact@v4
