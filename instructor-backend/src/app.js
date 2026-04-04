@@ -9,7 +9,13 @@ const app = express();
 const PORT = process.env.INSTRUCTOR_PORT || 5000;
 
 // 1. Middleware
-app.use(cors()); // Allows Shadman's frontend to fetch data
+// app.use(cors()); // Allows Shadman's frontend to fetch data
+app.use(cors({
+    origin: 'https://g4-isdautomaticprogresstracking.app',
+    methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH'],
+    credentials: true 
+}));
+
 app.use(express.json());
 
 // 2. Routes

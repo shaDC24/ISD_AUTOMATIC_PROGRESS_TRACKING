@@ -15,10 +15,10 @@ RESTART IDENTITY CASCADE;
 -- Password for ALL: "password123"
 -- ============================================
 INSERT INTO users (name, email, password, role) VALUES
-('Instructor Karim',  'karim@test.com',    '$2b$10$473YY5FQqDTPz/kJ/pKb3O/psLmcO0F1em8wMhiAyfYNWJQkEswGi', 'instructor'),
-('Student Shatabdi',  'shatabdi@test.com', '$2b$10$473YY5FQqDTPz/kJ/pKb3O/psLmcO0F1em8wMhiAyfYNWJQkEswGi', 'student'),
-('Student Shadman',   'shadman@test.com',  '$2b$10$473YY5FQqDTPz/kJ/pKb3O/psLmcO0F1em8wMhiAyfYNWJQkEswGi', 'student'),
-('Student Tanmi',     'tanmi@test.com',    '$2b$10$473YY5FQqDTPz/kJ/pKb3O/psLmcO0F1em8wMhiAyfYNWJQkEswGi', 'student');
+('Instructor Karim',  'karim@test.com',  'password123'  ,'instructor'),
+('Student Shatabdi',  'shatabdi@test.com', 'password123','student'),
+('Student Shadman',   'shadman@test.com',  'password123', 'student'),
+('Student Tanmi',     'tanmi@test.com',    'password123', 'student');
  
 -- ============================================
 -- 2. COURSES
