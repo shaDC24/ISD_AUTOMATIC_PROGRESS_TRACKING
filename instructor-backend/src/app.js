@@ -6,8 +6,8 @@ require('dotenv').config();
 const instructorRoutes = require('./routes/instructor');
 
 const app = express();
-const PORT = process.env.INSTRUCTOR_PORT || 5000;
-
+// const PORT = process.env.INSTRUCTOR_PORT || 5000;
+const PORT = process.env.PORT || 5001;     //for hosting in render 
 // 1. Middleware
 // app.use(cors()); // Allows Shadman's frontend to fetch data
 app.use(cors({
