@@ -29,6 +29,7 @@ export default function Login() {
         setError('');
 
         try {
+            console.log("awaiting for server response ");
             const res = await loginUser(formData);
             localStorage.setItem('token', res.data.token);
             localStorage.setItem('user', JSON.stringify(res.data.user));

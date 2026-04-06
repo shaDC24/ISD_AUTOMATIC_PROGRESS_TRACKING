@@ -48,7 +48,7 @@ const register = async (req, res) => {
 // Login
 const login = async (req, res) => {
     const { email, password } = req.body;
-
+    console.log("request received with email "+email+" pass "+password);
     try {
         // Check if user exists
         const user = await pool.query(

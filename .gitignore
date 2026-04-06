@@ -13,3 +13,5 @@ Thumbs.db
 
 # Vite build output
 dist/
+
+password_migration.py
