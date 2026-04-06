@@ -258,7 +258,7 @@ jobs:
         run: npx netlify-cli deploy --prod --dir=dist
         env:
           NETLIFY_AUTH_TOKEN: ${{ secrets.NETLIFY_AUTH_TOKEN }}
-          NETLIFY_PROJECT_ID: ${{ secrets.NETLIFY_TEAM_ID }}
+          NETLIFY_SITE_ID: ${{ secrets.NETLIFY_TEAM_ID }}
 
   deploy-student-backend:
     needs: [test-student-backend]
