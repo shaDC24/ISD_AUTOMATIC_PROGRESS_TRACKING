@@ -20,7 +20,7 @@ const app  = require('../src/index'); // your express app
 
 // Helper: generate a valid JWT token for tests
 const makeToken = (userId = 2, role = 'student') =>
-    jwt.sign({ id: userId, role }, process.env.JWT_SECRET || 'test_secret_key');
+    jwt.sign({ id: userId, role }, process.env.JWT_SECRET || 'mysecretjwtkey123');
 
 const authHeader = () => ({ Authorization: `Bearer ${makeToken()}` });
 

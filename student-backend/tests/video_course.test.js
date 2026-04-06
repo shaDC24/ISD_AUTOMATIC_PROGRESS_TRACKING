@@ -3,7 +3,7 @@ const jwt = require('jsonwebtoken');
 const pool = require('../src/db');
 
 // Set environment variables for testing
-process.env.JWT_SECRET = 'testsecret';
+process.env.JWT_SECRET = 'mysecretjwtkey123';
 process.env.JWT_EXPIRES_IN = '1h';
 
 // Mock database

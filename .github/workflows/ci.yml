@@ -175,7 +175,7 @@ jobs:
         working-directory: student-backend
         env:
           DATABASE_URL: postgresql://postgres:postgres@localhost:5432/progress_tracker_test
-          JWT_SECRET: test_secret_key
+          JWT_SECRET: mysecretjwtkey123
           JWT_EXPIRES_IN: 7d
           NODE_ENV: test
         run: npm test
@@ -201,7 +201,7 @@ jobs:
       - name: Run unit tests
         working-directory: instructor-backend
         env:
-          JWT_SECRET: test_secret_key
+          JWT_SECRET: mysecretjwtkey123
           NODE_ENV: test
         run: npm test
 

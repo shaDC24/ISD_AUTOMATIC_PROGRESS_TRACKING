@@ -10,7 +10,7 @@
     -- reviews
 
 RESTART IDENTITY CASCADE;
--- ============================================
+-- ============================================\
 -- 1. USERS
 -- Password for ALL: "password123"
 -- ============================================
@@ -159,4 +159,4 @@ VALUES
 (4, 2, 0.00, 0, 3)
 ON CONFLICT DO NOTHING;
 
-SELECT 'Seed data inserted successfully!' AS status;
+SELECT 'Seed data inserted successfully!' AS status
