@@ -37,9 +37,9 @@ describe('LearningStreak Component', () => {
 
         // Wait for API call and streak calculation
         await waitFor(() => {
-            expect(screen.getByText('3')).toBeInTheDocument();
+            expect(screen.getByTestId('streak-count')).toHaveTextContent('3');
         });
-        
+
         // Should show "days" next to the count
         expect(screen.getByText(/days/i)).toBeInTheDocument();
     });
@@ -55,7 +55,7 @@ describe('LearningStreak Component', () => {
 
         // The fallback in the component sets a 3-day streak
         await waitFor(() => {
-            expect(screen.getByText('3')).toBeInTheDocument();
+            expect(screen.getByTestId('streak-count')).toHaveTextContent('3');
         });
     });
 });

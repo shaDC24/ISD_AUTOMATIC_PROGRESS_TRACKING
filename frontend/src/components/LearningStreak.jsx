@@ -96,7 +96,7 @@ export default function LearningStreak() {
                     borderRadius: '20px',
                 }}>
                     <span style={{ fontSize: '20px' }}>🔥</span>
-                    <span style={{ fontSize: '20px', fontWeight: 700, color: '#d97706' }}>{streakCount}</span>
+                    <span data-testid="streak-count" style={{ fontSize: '20px', fontWeight: 700, color: '#d97706' }}>{streakCount}</span>
                     <span style={{ fontSize: '13px', color: '#d97706', fontWeight: 600 }}>days</span>
                 </div>
             </div>
