@@ -56,7 +56,7 @@ INSERT INTO video_lectures (section_id, title, video_url, subtitle_url, duration
     NULL, 599, 1),
  
 (1, 'Chapter 1 - Lecture 2: Network Architecture',
-    'https://res.cloudinary.com/dobnouuwt/video/upload/v1773657438/cse321-ch1-L2_bdrwaj.mp4',
+    'https://l.messenger.com/l.php?u=https%3A%2F%2Fres.cloudinary.com%2Fdwrdvofmu%2Fvideo%2Fupload%2Fv1775640143%2FLecture_16_htqnqz.mp4&h=AT7RB2Vp89qO4nFI9r9ZCBhpcFwGR06IJIRXCSJlC3hgBQ3BbI7eybsmIwSJ4IAEeyADFNXWOLemmuo262kFMn7RjO3vwxzRZz3_9gZ2QStKxJvG2NoFZgoP31cSjsU',
     NULL, 553, 2),
  
 (1, 'Chapter 1 - Lecture 3: Performance Metrics',
