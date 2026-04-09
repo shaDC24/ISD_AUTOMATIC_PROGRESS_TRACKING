@@ -52,11 +52,11 @@ INSERT INTO sections (course_id, title, position) VALUES
 -- ============================================
 INSERT INTO video_lectures (section_id, title, video_url, subtitle_url, duration, position) VALUES
 (1, 'Chapter 1 - Lecture 1: Introduction to Networks',
-    'https://res.cloudinary.com/dobnouuwt/video/upload/v1773657432/cse321-ch1-L1_gvdxrz.mp4',
+    'https://res.cloudinary.com/dielrox4d/video/upload/v1775713720/Lecture_5_aj9xwh.mp4',
     NULL, 599, 1),
  
 (1, 'Chapter 1 - Lecture 2: Network Architecture',
-    'https://res.cloudinary.com/dobnouuwt/video/upload/v1773657438/cse321-ch1-L2_bdrwaj.mp4',
+    'https://res.cloudinary.com/dielrox4d/video/upload/v1775713720/Lecture_5_aj9xwh.mp4',
     NULL, 553, 2),
  
 (1, 'Chapter 1 - Lecture 3: Performance Metrics',
